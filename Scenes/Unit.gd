@@ -75,6 +75,14 @@ func set_move_target(pos: Vector3):
 	if combat:
 		combat.set_aggressive_mode(false)
 
+func set_follow_target(target_unit: Node):
+	"""Command this unit to follow another unit"""
+	if movement:
+		movement.set_follow_target(target_unit)
+	# Following switches to passive mode
+	if combat:
+		combat.set_aggressive_mode(false)
+
 func stop_all_actions():
 	"""Stop all movement and combat actions"""
 	if movement:

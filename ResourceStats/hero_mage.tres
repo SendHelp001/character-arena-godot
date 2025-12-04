@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="StatData" load_steps=2 format=3 uid="uid://d78u71sfu5cj"]
+
+[ext_resource type="Script" uid="uid://cua3yj1au11r0" path="res://Scripts/StatData.gd" id="1_mage"]
+
+[resource]
+script = ExtResource("1_mage")
+name = "Mage"
+max_hp = 350
+move_speed = 9.5
+attack_damage = 95
+attack_range = 10.0
+attack_cooldown = 2.0
+armor = 3.0
+mana = 500
+mana_regen = 4.0
+gold_worth = 150
+metadata/_custom_type_script = "uid://cua3yj1au11r0"

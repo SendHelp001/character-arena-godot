@@ -1,7 +1,7 @@
 [gd_scene load_steps=11 format=3 uid="uid://bse20ws4otdc8"]
 
 [ext_resource type="Script" uid="uid://beh22loi7o0px" path="res://Scenes/Unit.gd" id="1_qk68r"]
-[ext_resource type="Resource" uid="uid://b4ati3agu6hl7" path="res://ResourceStats/hero1.tres" id="2_lymsv"]
+[ext_resource type="Resource" uid="uid://b4ati3agu6hl7" path="res://ResourceStats/hero_warrior.tres" id="2_lymsv"]
 [ext_resource type="Script" uid="uid://d3nmhythni8qv" path="res://Scenes/Components/UnitMovement.gd" id="3_ppost"]
 [ext_resource type="Script" uid="uid://bdvhyxnqswdv1" path="res://Scenes/Components/UnitCombat.gd" id="4_20lhf"]
 [ext_resource type="Script" uid="uid://dqg78oxd8p48j" path="res://Scenes/Components/UnitSelection.gd" id="5_uqujc"]
@@ -24,6 +24,7 @@ script = ExtResource("1_qk68r")
 stats_resource = ExtResource("2_lymsv")
 
 [node name="NavigationAgent3D" type="NavigationAgent3D" parent="."]
+avoidance_enabled = true
 debug_enabled = true
 
 [node name="SelectionRing" type="MeshInstance3D" parent="."]

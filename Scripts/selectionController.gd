@@ -62,18 +62,42 @@ func _unhandled_input(event):
 									u.set_combat_target(collider)
 							print("Attack command issued on:", collider.name)
 						else:
-							print("Can't attack friendly unit:", collider.name)
+							# Follow command - friendly unit
+							for u in selected:
+								if u.has_method("set_follow_target"):
+									u.set_follow_target(collider)
+							print("Follow command issued on ally:", collider.name)
 					else:
 						print("Right-clicked unit:", collider.name)
 				else:
 					# Move command for selected units
-					for u in selected:
-						u.set_move_target(result.position)
+					_move_units_with_formation(selected, result.position)
 		else:
 			# Clicked on empty space (no collision) - deselect all if left click
 			if event.button_index == MOUSE_BUTTON_LEFT:
 				_deselect_all()
 				print("Deselected all units (clicked on empty space)")
+
+# Move units with formation spread to prevent collision lag
+func _move_units_with_formation(units: Array, center_pos: Vector3):
+	if units.size() == 0:
+		return
+	
+	if units.size() == 1:
+		# Single unit - move directly to target
+		units[0].set_move_target(center_pos)
+		return
+	
+	# Multiple units - spread them in a circle formation
+	var spread_radius = .9  # Distance between units
+	var angle_step = TAU / units.size()  # Divide circle evenly
+	
+	for i in range(units.size()):
+		var angle = angle_step * i
+		var offset = Vector3(cos(angle), 0, sin(angle)) * spread_radius
+		var target_pos = center_pos + offset
+		units[i].set_move_target(target_pos)
+
 
 # Deselect all units
 func _deselect_all():
