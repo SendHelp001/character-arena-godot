@@ -1,10 +1,11 @@
-[gd_scene load_steps=13 format=3 uid="uid://cfrhyxgrw488v"]
+[gd_scene load_steps=14 format=3 uid="uid://cfrhyxgrw488v"]
 
 [ext_resource type="Script" uid="uid://cjey2pgieryep" path="res://Scripts/cameraController.gd" id="1_c6gwx"]
 [ext_resource type="Script" uid="uid://dm8w3c4c2u5d4" path="res://Scripts/selectionController.gd" id="2_2dftf"]
 [ext_resource type="PackedScene" uid="uid://bse20ws4otdc8" path="res://Scenes/Unit.tscn" id="3_bcbcq"]
-[ext_resource type="Resource" uid="uid://cqb5h8x2v3n4a" path="res://ResourceStats/hero_archer.tres" id="5_archer"]
-[ext_resource type="Resource" uid="uid://d78u71sfu5cj" path="res://ResourceStats/hero_mage.tres" id="6_mage"]
+[ext_resource type="Script" uid="uid://cio7gctac5qpo" path="res://Scripts/FPSLabel.gd" id="4_fps"]
+[ext_resource type="Resource" path="res://ResourceStats/hero_archer.tres" id="5_archer"]
+[ext_resource type="Resource" path="res://ResourceStats/hero_mage.tres" id="6_mage"]
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_bcbcq"]
 sky_horizon_color = Color(0.66224277, 0.6717428, 0.6867428, 1)
@@ -20,16 +21,16 @@ tonemap_mode = 2
 glow_enabled = true
 
 [sub_resource type="PlaneMesh" id="PlaneMesh_cmany"]
-size = Vector2(20, 20)
+size = Vector2(40, 40)
 
 [sub_resource type="NavigationMesh" id="NavigationMesh_2dftf"]
-vertices = PackedVector3Array(-9.48955, 0.5, -9.498327, -9.48955, 0.5, 9.501673, 9.51045, 0.5, 9.501673, 9.51045, 0.5, -9.498327)
+vertices = PackedVector3Array(-19.491013, 1, -19.468342, -19.491013, 1, 19.531658, 19.508987, 1, 19.531658, 19.508987, 1, -19.468342)
 polygons = [PackedInt32Array(3, 2, 0), PackedInt32Array(0, 2, 1)]
 
 [sub_resource type="PhysicsMaterial" id="PhysicsMaterial_2dftf"]
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_bcbcq"]
-size = Vector3(20.001099, 1, 20.058655)
+size = Vector3(40.07451, 1, 40.103962)
 
 [node name="World" type="Node3D"]
 
@@ -46,7 +47,7 @@ navigation_mesh = SubResource("NavigationMesh_2dftf")
 physics_material_override = SubResource("PhysicsMaterial_2dftf")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="NavigationRegion3D/StaticBody3D"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.011, -0.5, 0.031)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.04624176, 0, 0.083639145)
 shape = SubResource("BoxShape3D_bcbcq")
 
 [node name="Camera3D" type="Camera3D" parent="."]
@@ -74,3 +75,11 @@ stats_resource = ExtResource("6_mage")
 [node name="EnemyWarrior" parent="." instance=ExtResource("3_bcbcq")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.1161244, -5)
 team_id = 1
+
+[node name="CanvasLayer" type="CanvasLayer" parent="."]
+
+[node name="FPSLabel" type="Label" parent="CanvasLayer"]
+offset_right = 40.0
+offset_bottom = 23.0
+text = "FPS: 60"
+script = ExtResource("4_fps")
