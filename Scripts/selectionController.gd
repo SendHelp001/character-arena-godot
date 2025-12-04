@@ -29,7 +29,7 @@ func _unhandled_input(event):
 		var result = get_viewport().get_world_3d().direct_space_state.intersect_ray(ray)
 
 		# Check if shift is held for multi-select
-		var multi_select = Input.is_key_pressed(KEY_SHIFT)
+		var _multi_select = Input.is_key_pressed(KEY_SHIFT)
 
 		if result:
 			var collider = result.collider

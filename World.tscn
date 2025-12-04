@@ -2,7 +2,7 @@
 
 [ext_resource type="Script" uid="uid://cjey2pgieryep" path="res://Scripts/cameraController.gd" id="1_c6gwx"]
 [ext_resource type="Script" uid="uid://dm8w3c4c2u5d4" path="res://Scripts/selectionController.gd" id="2_2dftf"]
-[ext_resource type="PackedScene" uid="uid://bse20ws4otdc8" path="res://Scenes/Unit.tscn" id="3_bcbcq"]
+[ext_resource type="PackedScene" uid="uid://bse20ws4otdc8" path="res://Scenes/Units/Unit.tscn" id="3_bcbcq"]
 [ext_resource type="Script" uid="uid://cio7gctac5qpo" path="res://Scripts/FPSLabel.gd" id="4_fps"]
 [ext_resource type="Resource" path="res://ResourceStats/hero_archer.tres" id="5_archer"]
 [ext_resource type="Resource" path="res://ResourceStats/hero_mage.tres" id="6_mage"]
@@ -52,8 +52,11 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.04624176, 0, 0.083639145)
 shape = SubResource("BoxShape3D_bcbcq")
 
 [node name="Camera3D" type="Camera3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 0.73035306, 0.6830698, 0, -0.6830698, 0.73035306, 0, 3.393238, 0)
+transform = Transform3D(1, 0, 0, 0, 0.7071067, 0.7071067, 0, -0.7071067, 0.7071067, 0, 3.393238, 0)
 script = ExtResource("1_c6gwx")
+zoom_speed = 2.0
+min_height = 7.0
+max_height = 25.0
 
 [node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 0.54902285, 0.8358074, 0, -0.8358074, 0.54902285, 0, 7.298506, 0)

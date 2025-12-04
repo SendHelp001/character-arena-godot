@@ -50,7 +50,7 @@ func _ready():
 		selection.setup(self, ring)
 	
 	if ui:
-		ui.setup(stats, stats_label)
+		ui.setup(stats, stats_label, team_id)
 
 # ------------------------------
 # Physics Process
