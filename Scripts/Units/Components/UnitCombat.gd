@@ -28,6 +28,13 @@ var stats  # Stats type
 var movement  # UnitMovement type
 
 # ------------------------------
+# Ranged Unit Settings
+# ------------------------------
+@export var is_ranged: bool = false
+@export var projectile_scene: PackedScene
+@export var projectile_spawn_offset: Vector3 = Vector3(0, 1.2, 0)
+
+# ------------------------------
 # State
 # ------------------------------
 var target: Node = null
@@ -126,13 +133,32 @@ func _execute_attack():
 	
 	attack_timer = stats.stat_data.attack_cooldown
 	
-	# Call take_damage directly on the target unit
-	if target.has_method("take_damage"):
-		target.take_damage(stats.stat_data.attack_damage)
-		attack_executed.emit(target)
-		print("%s attacked %s for %d damage" % [unit.name, target.name, stats.stat_data.attack_damage])
+	if is_ranged:
+		_spawn_projectile()
 	else:
-		print("Warning: %s cannot take damage!" % target.name)
+		# Melee damage
+		if target.has_method("take_damage"):
+			target.take_damage(stats.stat_data.attack_damage)
+			attack_executed.emit(target)
+			print("%s attacked %s for %d damage" % [unit.name, target.name, stats.stat_data.attack_damage])
+		else:
+			print("Warning: %s cannot take damage!" % target.name)
+
+# ------------------------------
+# Ranged Projectile Spawning
+# ------------------------------
+func _spawn_projectile():
+	if not projectile_scene:
+		push_warning("Ranged unit has no projectile scene assigned!")
+		return
+	
+	var proj = projectile_scene.instantiate()
+	proj.global_position = unit.global_position + projectile_spawn_offset
+	proj.target = target
+	proj.owner_unit = unit
+	proj.damage = stats.stat_data.attack_damage
+	
+	unit.get_tree().current_scene.add_child(proj)
 
 # ------------------------------
 # Auto-Targeting AI
