@@ -1,11 +1,11 @@
 [gd_scene load_steps=12 format=3 uid="uid://bse20ws4otdc8"]
 
-[ext_resource type="Script" uid="uid://beh22loi7o0px" path="res://Scenes/Units/Unit.gd" id="1_qk68r"]
+[ext_resource type="Script" uid="uid://beh22loi7o0px" path="res://Scripts/Units/Unit.gd" id="1_qk68r"]
 [ext_resource type="Resource" uid="uid://b4ati3agu6hl7" path="res://ResourceStats/hero_warrior.tres" id="2_lymsv"]
-[ext_resource type="Script" uid="uid://d3nmhythni8qv" path="res://Scenes/Components/UnitMovement.gd" id="3_ppost"]
-[ext_resource type="Script" uid="uid://bdvhyxnqswdv1" path="res://Scenes/Components/UnitCombat.gd" id="4_20lhf"]
-[ext_resource type="Script" uid="uid://dqg78oxd8p48j" path="res://Scenes/Components/UnitSelection.gd" id="5_uqujc"]
-[ext_resource type="Script" uid="uid://dpak7jdwiossy" path="res://Scenes/Components/UnitUI.gd" id="6_e33bx"]
+[ext_resource type="Script" uid="uid://d3nmhythni8qv" path="res://Scripts/Units/Components/UnitMovement.gd" id="3_ppost"]
+[ext_resource type="Script" uid="uid://bdvhyxnqswdv1" path="res://Scripts/Units/Components/UnitCombat.gd" id="4_20lhf"]
+[ext_resource type="Script" uid="uid://dqg78oxd8p48j" path="res://Scripts/Units/Components/UnitSelection.gd" id="5_uqujc"]
+[ext_resource type="Script" uid="uid://dpak7jdwiossy" path="res://Scripts/Units/Components/UnitUI.gd" id="6_e33bx"]
 
 [sub_resource type="CylinderShape3D" id="CylinderShape3D_separation"]
 radius = 1.2
