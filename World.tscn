@@ -1,0 +1,66 @@
+[gd_scene load_steps=11 format=3 uid="uid://cfrhyxgrw488v"]
+
+[ext_resource type="Script" uid="uid://cjey2pgieryep" path="res://Scripts/cameraController.gd" id="1_c6gwx"]
+[ext_resource type="Script" uid="uid://dm8w3c4c2u5d4" path="res://Scripts/selectionController.gd" id="2_2dftf"]
+[ext_resource type="PackedScene" uid="uid://bse20ws4otdc8" path="res://Scenes/Unit.tscn" id="3_bcbcq"]
+
+[sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_bcbcq"]
+sky_horizon_color = Color(0.66224277, 0.6717428, 0.6867428, 1)
+ground_horizon_color = Color(0.66224277, 0.6717428, 0.6867428, 1)
+
+[sub_resource type="Sky" id="Sky_js7pq"]
+sky_material = SubResource("ProceduralSkyMaterial_bcbcq")
+
+[sub_resource type="Environment" id="Environment_eu7l1"]
+background_mode = 2
+sky = SubResource("Sky_js7pq")
+tonemap_mode = 2
+glow_enabled = true
+
+[sub_resource type="PlaneMesh" id="PlaneMesh_cmany"]
+size = Vector2(20, 20)
+
+[sub_resource type="NavigationMesh" id="NavigationMesh_2dftf"]
+vertices = PackedVector3Array(-9.48955, 0.5, -9.498327, -9.48955, 0.5, 9.501673, 9.51045, 0.5, 9.501673, 9.51045, 0.5, -9.498327)
+polygons = [PackedInt32Array(3, 2, 0), PackedInt32Array(0, 2, 1)]
+
+[sub_resource type="PhysicsMaterial" id="PhysicsMaterial_2dftf"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_bcbcq"]
+size = Vector3(20.001099, 1, 20.058655)
+
+[node name="World" type="Node3D"]
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("Environment_eu7l1")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="."]
+mesh = SubResource("PlaneMesh_cmany")
+
+[node name="NavigationRegion3D" type="NavigationRegion3D" parent="."]
+navigation_mesh = SubResource("NavigationMesh_2dftf")
+
+[node name="StaticBody3D" type="StaticBody3D" parent="NavigationRegion3D"]
+physics_material_override = SubResource("PhysicsMaterial_2dftf")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="NavigationRegion3D/StaticBody3D"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.011, -0.5, 0.031)
+shape = SubResource("BoxShape3D_bcbcq")
+
+[node name="Camera3D" type="Camera3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 0.73035306, 0.6830698, 0, -0.6830698, 0.73035306, 0, 3.393238, 0)
+script = ExtResource("1_c6gwx")
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 0.54902285, 0.8358074, 0, -0.8358074, 0.54902285, 0, 7.298506, 0)
+
+[node name="Node3D" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 0.73035306, 0.6830698, 0, -0.6830698, 0.73035306, 0, 3.393238, 0)
+script = ExtResource("2_2dftf")
+
+[node name="Unit" parent="." instance=ExtResource("3_bcbcq")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.1161244, 4.7356663)
+
+[node name="Unit2" parent="." instance=ExtResource("3_bcbcq")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.1161244, -3.809816)
+team_id = 1
