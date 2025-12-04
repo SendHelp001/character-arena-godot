@@ -6,7 +6,7 @@
 script = ExtResource("1_archer")
 name = "Archer"
 max_hp = 420
-move_speed = 200.0
+move_speed = 285.0
 attack_damage = 75
 attack_range = 8.0
 attack_cooldown = 1.5

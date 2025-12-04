@@ -6,9 +6,8 @@
 script = ExtResource("1_disca")
 name = "Warrior"
 max_hp = 600
-move_speed = 10.0
+move_speed = 310.0
 attack_damage = 55
-attack_range = 2.5
 attack_cooldown = 1.2
 armor = 15.0
 mana = 150

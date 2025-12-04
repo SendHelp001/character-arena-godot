@@ -11,5 +11,5 @@ class_name StatData
 @export var armor: float = 0.0
 @export var mana: int = 0
 @export var mana_regen: float = 0
-@export var abilities: Array = [] # store ability resource paths
+@export var abilities: Array[Resource] = []  # Array of Ability resources
 @export var gold_worth: int = 0

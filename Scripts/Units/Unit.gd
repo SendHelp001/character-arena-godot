@@ -16,13 +16,14 @@ var stats: Stats                         # runtime Stats component
 @onready var ring := $SelectionRing
 @onready var stats_label := $StatsLabel
 
-# ------------------------------
 # Component references
 # ------------------------------
 @onready var movement: UnitMovement = $UnitMovement
 @onready var combat: UnitCombat = $UnitCombat
 @onready var selection: UnitSelection = $UnitSelection
 @onready var ui: UnitUI = $UnitUI
+@onready var abilities: UnitAbilities = $UnitAbilities
+
 
 # ------------------------------
 # Initialization
@@ -51,6 +52,13 @@ func _ready():
 	
 	if ui:
 		ui.setup(stats, stats_label, team_id)
+	
+	# Setup abilities
+	if abilities:
+		abilities.setup(self)
+		# Load abilities from stats resource
+		if stats_resource and stats_resource.abilities.size() > 0:
+			abilities.load_abilities_from_resources(stats_resource.abilities)
 
 # ------------------------------
 # Physics Process
@@ -122,6 +130,15 @@ func take_damage(amount):
 		print("Unit %s took %d damage, HP now: %d" % [name, amount, stats.current_hp])
 		if stats.current_hp <= 0:
 			queue_free()
+
+# ------------------------------
+# Public API - Stats & Abilities
+# ------------------------------
+func get_stats() -> Stats:
+	return stats
+
+func get_abilities() -> UnitAbilities:
+	return abilities
 
 func get_team_id() -> int:
 	return team_id
