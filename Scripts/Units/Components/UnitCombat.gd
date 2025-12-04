@@ -153,12 +153,16 @@ func _spawn_projectile():
 		return
 	
 	var proj = projectile_scene.instantiate()
+	
+	# Add to scene first
+	unit.get_tree().current_scene.add_child(proj)
+	
+	# Now global_position is valid
 	proj.global_position = unit.global_position + projectile_spawn_offset
 	proj.target = target
 	proj.owner_unit = unit
 	proj.damage = stats.stat_data.attack_damage
-	
-	unit.get_tree().current_scene.add_child(proj)
+
 
 # ------------------------------
 # Auto-Targeting AI

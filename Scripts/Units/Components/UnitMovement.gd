@@ -28,7 +28,6 @@ func setup(p_unit, p_stats, p_agent):
 var follow_target: Node = null  # Unit to follow
 
 func set_target_position(pos: Vector3):
-	# Clear follow target when manually moving
 	follow_target = null
 	if agent:
 		agent.set_target_position(pos)
@@ -41,7 +40,7 @@ func is_navigation_finished() -> bool:
 	return agent.is_navigation_finished() if agent else true
 
 func stop_movement():
-	follow_target = null  # Stop following
+	follow_target = null
 	if agent and unit:
 		agent.set_target_position(unit.global_position)
 
@@ -64,61 +63,63 @@ func process_movement(_delta: float):
 		return
 	
 	var next = agent.get_next_path_position()
-	var dir = next - unit.global_position
+	var dir = (next - unit.global_position)
+	dir.y = 0  # flatten to XZ
+	var distance = dir.length()
 	
-	if dir.length() > 0.1:
-		var move_velocity = dir.normalized() * stats.stat_data.move_speed
+	if distance > 0.1:
+		var move_velocity = dir.normalized() * stats.stat_data.move_speed * 0.01
 		
 		# Apply avoidance steering (separation + tangent)
 		var avoidance = _calculate_separation_force()
-		unit.velocity = move_velocity + avoidance
+		
+		# Combine movement + avoidance
+		var final_velocity = (move_velocity + avoidance)
+		final_velocity.y = 0
+		unit.velocity = final_velocity
 		unit.move_and_slide()
 	else:
-		# Only stop if not following
+		# Stop at target
 		if not follow_target:
 			agent.set_target_position(unit.global_position)
 			target_reached.emit()
 
+# ------------------------------
+# Local Steering / Separation
+# ------------------------------
 func _calculate_separation_force() -> Vector3:
 	var avoidance_force = Vector3.ZERO
-	var neighbors = unit.get_node("SeparationArea").get_overlapping_bodies()
+	var separation_area = unit.get_node_or_null("SeparationArea")
+	if not separation_area:
+		return avoidance_force
+	
+	var neighbors = separation_area.get_overlapping_bodies()
+	var personal_space = 1.0
 	var separation_strength = 4.0
-	var steering_strength = 6.0
+	var tangent_strength = 6.0
 	
 	for neighbor in neighbors:
 		if neighbor != unit and neighbor is CharacterBody3D:
-			var to_neighbor = neighbor.global_position - unit.global_position
-			var dist = to_neighbor.length()
-			
+			var offset = neighbor.global_position - unit.global_position
+			offset.y = 0
+			var dist = offset.length()
 			if dist < 0.01: continue
 			
-			# 1. Repulsion (Personal Space) - Push away if too close
-			if dist < 1.0:
-				var push_force = (1.0 - dist) / 1.0
-				avoidance_force -= to_neighbor.normalized() * push_force * separation_strength
+			# 1. Repulsion (personal space)
+			if dist < personal_space:
+				var push = (personal_space - dist) / personal_space
+				avoidance_force -= offset.normalized() * push * separation_strength
 			
-			# 2. Tangent Steering (Going Around)
-			# Check if neighbor is roughly in front of us
-			var forward = -unit.global_transform.basis.z
-			if unit.velocity.length() > 0.1:
-				forward = unit.velocity.normalized()
-				
-			var dot = forward.dot(to_neighbor.normalized())
-			
-			# If neighbor is in front (dot > 0.5 means within ~60 degrees)
+			# 2. Tangent steering (go around unit)
+			var forward = unit.velocity.normalized() if unit.velocity.length() > 0.1 else -unit.global_transform.basis.z
+			var dot = forward.dot(offset.normalized())
 			if dot > 0.5 and dist < 2.0:
-				# Calculate tangent vector (perpendicular to direction to neighbor)
-				# We want to steer to the side that is "easier"
-				var tangent = to_neighbor.cross(Vector3.UP).normalized()
-				
-				# Determine which side to steer towards using cross product with forward
-				# If neighbor is slightly left, steer right. If slightly right, steer left.
-				var side = forward.cross(to_neighbor).y
+				var tangent = offset.cross(Vector3.UP).normalized()
+				var side = forward.cross(offset).y
 				if side > 0:
-					avoidance_force -= tangent * steering_strength # Steer Left
+					avoidance_force -= tangent * tangent_strength
 				else:
-					avoidance_force += tangent * steering_strength # Steer Right
+					avoidance_force += tangent * tangent_strength
 	
-	# Flatten to XZ plane
 	avoidance_force.y = 0
 	return avoidance_force

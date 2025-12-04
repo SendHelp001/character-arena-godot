@@ -69,12 +69,12 @@ func _select_units_in_box():
 	if rect.size.length() < 5.0:
 		# Too small, treat as single click
 		# Find the selection controller
-		var controller = get_tree().root.find_child("Node3D", true, false) # Assuming it's named Node3D in World.tscn or we find by script
+		var controller = get_tree().root.find_child("SelectionController", true, false) # Assuming it's named Node3D in World.tscn or we find by script
 		# Better way: get it from a known group or path. In World.tscn it is "Node3D".
 		# Let's try to find it by type or group if possible.
 		# Or just get parent's parent's child? CanvasLayer -> World -> Node3D
 		var world = get_parent().get_parent()
-		var selection_controller = world.get_node("Node3D")
+		var selection_controller = world.get_node("SelectionController")
 		
 		if selection_controller and selection_controller.has_method("try_select_at"):
 			selection_controller.try_select_at(drag_start, keep_existing)

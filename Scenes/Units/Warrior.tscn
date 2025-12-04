@@ -27,6 +27,8 @@ script = ExtResource("1_1nrda")
 stats_resource = ExtResource("2_6qodk")
 
 [node name="NavigationAgent3D" type="NavigationAgent3D" parent="."]
+avoidance_enabled = true
+radius = 5.0
 debug_enabled = true
 
 [node name="SeparationArea" type="Area3D" parent="."]

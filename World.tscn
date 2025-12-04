@@ -88,5 +88,5 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.090961576, 1.5, -6.468279)
 team_id = 1
 
 [node name="Archer" parent="." instance=ExtResource("4_wygdx")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.3090893, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.3090894, -2.3841858e-07)
 stats_resource = ExtResource("5_archer")
