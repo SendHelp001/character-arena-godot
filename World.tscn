@@ -1,4 +1,4 @@
-[gd_scene load_steps=14 format=3 uid="uid://cfrhyxgrw488v"]
+[gd_scene load_steps=15 format=3 uid="uid://cfrhyxgrw488v"]
 
 [ext_resource type="Script" uid="uid://cjey2pgieryep" path="res://Scripts/cameraController.gd" id="1_c6gwx"]
 [ext_resource type="Script" uid="uid://dm8w3c4c2u5d4" path="res://Scripts/selectionController.gd" id="2_2dftf"]
@@ -6,6 +6,7 @@
 [ext_resource type="Script" uid="uid://cio7gctac5qpo" path="res://Scripts/FPSLabel.gd" id="4_fps"]
 [ext_resource type="Resource" path="res://ResourceStats/hero_archer.tres" id="5_archer"]
 [ext_resource type="Resource" path="res://ResourceStats/hero_mage.tres" id="6_mage"]
+[ext_resource type="Script" uid="uid://cd6rq3pujxlyk" path="res://Scripts/SelectionBox.gd" id="7_selection_box"]
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_bcbcq"]
 sky_horizon_color = Color(0.66224277, 0.6717428, 0.6867428, 1)
@@ -83,3 +84,13 @@ offset_right = 40.0
 offset_bottom = 23.0
 text = "FPS: 60"
 script = ExtResource("4_fps")
+
+[node name="SelectionBox" type="Control" parent="CanvasLayer"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+script = ExtResource("7_selection_box")

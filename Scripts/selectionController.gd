@@ -33,18 +33,9 @@ func _unhandled_input(event):
 
 		if result:
 			var collider = result.collider
-			if event.button_index == MOUSE_BUTTON_LEFT:
-				if collider.is_in_group(selectable_group):
-					# Deselect all others if not multi-selecting
-					if not multi_select:
-						_deselect_all_except(collider)
-					collider.set_selected(true)
-					print("Selected:", collider.name)
-				else:
-					# Clicked on non-selectable object (ground, etc.) - deselect all
-					_deselect_all()
-					print("Deselected all units (clicked on ground)")
-			elif event.button_index == MOUSE_BUTTON_RIGHT:
+
+			# RIGHT-CLICK COMMANDS
+			if event.button_index == MOUSE_BUTTON_RIGHT:
 				var selected = get_tree().get_nodes_in_group("selected_unit")
 				if selected.size() == 0:
 					return
@@ -72,25 +63,54 @@ func _unhandled_input(event):
 				else:
 					# Move command for selected units
 					_move_units_with_formation(selected, result.position)
-		else:
-			# Clicked on empty space (no collision) - deselect all if left click
-			if event.button_index == MOUSE_BUTTON_LEFT:
-				_deselect_all()
-				print("Deselected all units (clicked on empty space)")
 
-# Move units with formation spread to prevent collision lag
+# -----------------------------
+# SELECTION (Single Click)
+# -----------------------------
+func try_select_at(screen_pos: Vector2, multi_select: bool = false):
+	var cam = get_viewport().get_camera_3d()
+	if cam == null: 
+		return
+
+	var origin = cam.project_ray_origin(screen_pos)
+	var dir = cam.project_ray_normal(screen_pos)
+
+	var ray = PhysicsRayQueryParameters3D.new()
+	ray.from = origin
+	ray.to = origin + dir * 2000
+
+	var result = get_viewport().get_world_3d().direct_space_state.intersect_ray(ray)
+	
+	if result:
+		var collider = result.collider
+		if collider.is_in_group(selectable_group):
+			# Deselect all others if not multi-selecting
+			if not multi_select:
+				_deselect_all_except(collider)
+			collider.set_selected(true)
+			print("Selected:", collider.name)
+		else:
+			if not multi_select:
+				_deselect_all()
+				print("Deselected all units (clicked on ground)")
+	else:
+		if not multi_select:
+			_deselect_all()
+			print("Deselected all units (clicked on empty space)")
+
+# -----------------------------
+# MOVEMENT WITH FORMATION
+# -----------------------------
 func _move_units_with_formation(units: Array, center_pos: Vector3):
 	if units.size() == 0:
 		return
 	
 	if units.size() == 1:
-		# Single unit - move directly to target
 		units[0].set_move_target(center_pos)
 		return
 	
-	# Multiple units - spread them in a circle formation
-	var spread_radius = .9  # Distance between units
-	var angle_step = TAU / units.size()  # Divide circle evenly
+	var spread_radius = 0.9
+	var angle_step = TAU / units.size()
 	
 	for i in range(units.size()):
 		var angle = angle_step * i
@@ -98,14 +118,14 @@ func _move_units_with_formation(units: Array, center_pos: Vector3):
 		var target_pos = center_pos + offset
 		units[i].set_move_target(target_pos)
 
-
-# Deselect all units
+# -----------------------------
+# DESELECTION HELPERS
+# -----------------------------
 func _deselect_all():
 	var selected = get_tree().get_nodes_in_group("selected_unit")
 	for u in selected:
 		u.set_selected(false)
 
-# Deselect all units except the specified one
 func _deselect_all_except(keep_selected):
 	var selected = get_tree().get_nodes_in_group("selected_unit")
 	for u in selected:
