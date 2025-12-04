@@ -13,9 +13,10 @@ var tracked_unit: Unit = null
 const ABILITY_BUTTON_SCENE = preload("res://Scenes/UI/AbilityButton.tscn")
 
 func _ready():
-	# Find player's unit (assumes first selected friendly unit)
-	# In a real game, you'd have a proper player controller
-	pass
+	# Add to group for easy access
+	add_to_group("player_ui")
+	# Start hidden
+	visible = false
 
 func track_unit(unit: Unit):
 	tracked_unit = unit
@@ -48,18 +49,30 @@ func _update_ability_buttons():
 	
 	var abilities_component = tracked_unit.get_abilities()
 	if not abilities_component:
+		# Unit has no abilities component - just show empty slots
+		for i in range(6):
+			var button = Button.new()
+			button.text = "-"
+			button.disabled = true
+			button.custom_minimum_size = Vector2(48, 48)
+			ability_container.add_child(button)
 		return
 	
 	# Create button for each ability slot
 	for i in range(6):
 		var ability_instance = abilities_component.get_ability(i)
-		var button = ABILITY_BUTTON_SCENE.instantiate() if ABILITY_BUTTON_SCENE else Button.new()
+		var button = Button.new()
+		button.custom_minimum_size = Vector2(48, 48)
 		
 		if ability_instance and ability_instance.ability:
-			button.text = ability_instance.ability.ability_name[0]  # First letter
+			# Has an ability - set it up
 			if button.has_method("setup"):
+				button.set_script(load("res://Scripts/UI/AbilityButton.gd"))
 				button.setup(ability_instance, i)
+			else:
+				button.text = ability_instance.ability.ability_name.substr(0, 1)
 		else:
+			# Empty slot
 			button.text = "-"
 			button.disabled = true
 		

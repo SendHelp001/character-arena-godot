@@ -9,6 +9,22 @@ var drag_start := Vector2.ZERO
 var current_mouse_pos := Vector2.ZERO
 
 func _input(event):
+	# Ignore input if mouse is over UI
+	if event is InputEventMouseButton or event is InputEventMouseMotion:
+		var mouse_pos = get_viewport().get_mouse_position()
+		# Check if mouse is over any Control nodes (UI)
+		var ui_rect = get_global_rect()
+		# Since this SelectionBox covers the whole screen, we need to check children
+		# But actually, we should check if PlayerUI is blocking input
+		var player_ui = get_tree().get_first_node_in_group("player_ui")
+		if player_ui and player_ui is CanvasLayer:
+			# Check if mouse is over the PlayerUI panel
+			for child in player_ui.get_children():
+				if child is Control and child.visible:
+					var rect = child.get_global_rect()
+					if rect.has_point(mouse_pos):
+						return # Ignore input, mouse is over UI
+	
 	if event is InputEventMouseButton:
 		if event.button_index == MOUSE_BUTTON_LEFT:
 			if event.pressed:
@@ -23,9 +39,13 @@ func _input(event):
 					queue_redraw()
 					_select_units_in_box()
 
-	elif event is InputEventMouseMotion and is_dragging:
-		current_mouse_pos = event.position
-		queue_redraw()
+	elif event is InputEventMouseMotion:
+		if is_dragging:
+			# Only update if mouse actually moved significantly
+			var delta = event.position - current_mouse_pos
+			if delta.length() > 2.0:  # Only redraw if moved more than 2 pixels
+				current_mouse_pos = event.position
+				queue_redraw()
 
 func _draw():
 	if is_dragging:
@@ -44,13 +64,6 @@ func _select_units_in_box():
 	var rect = _get_selection_rect()
 	var cam = get_viewport().get_camera_3d()
 	
-	# If the box is too small, treat it as a single click (handled by raycast in selectionController)
-	# BUT, if we want to replace selectionController's left click, we should handle it here.
-	# Let's try to handle everything here for consistency, OR delegate single clicks.
-	# For now, let's assume if rect area is small, we might want to let raycast handle it?
-	# Actually, the user wants "improve unit selection".
-	# Let's select all units whose screen position is inside the rect.
-	
 	var units = get_tree().get_nodes_in_group("unit")
 	var selected_count = 0
 	
@@ -61,32 +74,34 @@ func _select_units_in_box():
 		# Deselect all if making a new box selection
 		get_tree().call_group("selected_unit", "set_selected", false)
 	
-	# If box is tiny, ignore it here and let selectionController handle the precise raycast?
-	# The issue is conflict. If I handle Left Click here, selectionController also handles it.
-	# I should probably disable Left Click in selectionController if I implement it here.
-	# OR, only handle "Box" selection here, and let "Click" selection stay in selectionController.
-	
 	if rect.size.length() < 5.0:
 		# Too small, treat as single click
-		# Find the selection controller
-		var controller = get_tree().root.find_child("SelectionController", true, false) # Assuming it's named Node3D in World.tscn or we find by script
-		# Better way: get it from a known group or path. In World.tscn it is "Node3D".
-		# Let's try to find it by type or group if possible.
-		# Or just get parent's parent's child? CanvasLayer -> World -> Node3D
+		var controller = get_tree().root.find_child("SelectionController", true, false)
 		var world = get_parent().get_parent()
 		var selection_controller = world.get_node("SelectionController")
 		
 		if selection_controller and selection_controller.has_method("try_select_at"):
 			selection_controller.try_select_at(drag_start, keep_existing)
 		return
-		
+	
+	# Track which units we've already processed to avoid duplicates
+	var processed_units = []
+	
 	for unit in units:
+		# Skip if already processed
+		if unit in processed_units:
+			continue
+			
 		if not unit.is_visible_in_tree():
 			continue
 			
 		var screen_pos = cam.unproject_position(unit.global_position)
 		if rect.has_point(screen_pos):
-			unit.set_selected(true)
-			selected_count += 1
+			# Only select if not already selected (prevents spam)
+			if not unit.is_selected():
+				unit.set_selected(true)
+				selected_count += 1
+			processed_units.append(unit)
 	
-	print("Box selected %d units" % selected_count)
+	if selected_count > 0:
+		print("Box selected %d units" % selected_count)

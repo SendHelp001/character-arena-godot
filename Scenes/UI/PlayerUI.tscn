@@ -1,6 +1,14 @@
-[gd_scene load_steps=2 format=3]
+[gd_scene load_steps=5 format=3 uid="uid://b172h8rtydne6"]
 
-[ext_resource type="Script" path="res://Scripts/UI/PlayerUI.gd" id="1"]
+[ext_resource type="Script" uid="uid://b20fryf7i7kpv" path="res://Scripts/UI/PlayerUI.gd" id="1"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_iyl1i"]
+bg_color = Color(0, 0.7235517, 0.2564838, 1)
+
+[sub_resource type="Theme" id="Theme_an405"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_avra4"]
+bg_color = Color(0.3019608, 0.6, 0.8039216, 1)
 
 [node name="PlayerUI" type="CanvasLayer"]
 script = ExtResource("1")
@@ -38,16 +46,15 @@ size_flags_horizontal = 3
 [node name="HPBar" type="ProgressBar" parent="Panel/MarginContainer/HBox/VBox"]
 custom_minimum_size = Vector2(0, 20)
 layout_mode = 2
-max_value = 100.0
+theme_override_styles/background = SubResource("StyleBoxFlat_iyl1i")
 value = 100.0
-show_percentage = false
 
 [node name="MPBar" type="ProgressBar" parent="Panel/MarginContainer/HBox/VBox"]
 custom_minimum_size = Vector2(0, 20)
 layout_mode = 2
-max_value = 100.0
+theme = SubResource("Theme_an405")
+theme_override_styles/background = SubResource("StyleBoxFlat_avra4")
 value = 100.0
-show_percentage = false
 
 [node name="AbilityContainer" type="HBoxContainer" parent="Panel/MarginContainer/HBox/VBox"]
 layout_mode = 2
