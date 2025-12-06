@@ -1,4 +1,4 @@
-[gd_scene load_steps=18 format=3 uid="uid://cfrhyxgrw488v"]
+[gd_scene load_steps=19 format=3 uid="uid://cfrhyxgrw488v"]
 
 [ext_resource type="Script" uid="uid://cjey2pgieryep" path="res://Scripts/cameraController.gd" id="1_c6gwx"]
 [ext_resource type="Script" uid="uid://1ssoj02b8pxp" path="res://Scripts/UISetup.gd" id="1_fv4w7"]
@@ -10,6 +10,8 @@
 [ext_resource type="PackedScene" uid="uid://csx2eoajop3km" path="res://Scenes/Units/Warrior/Warrior.tscn" id="7_wygdx"]
 [ext_resource type="PackedScene" uid="uid://b172h8rtydne6" path="res://Scenes/UI/PlayerUI.tscn" id="9_fvag4"]
 [ext_resource type="Script" uid="uid://bxod6n47w0hu5" path="res://Scripts/AbilityCasting/CastingManager.gd" id="10_casting_mgr"]
+[ext_resource type="Script" uid="uid://cjroopsonw4ay" path="res://Scripts/GridRegion.gd" id="11_kva58"]
+[ext_resource type="PackedScene" uid="uid://b8q7x4y201w3" path="res://Scenes/Environment/Wall.tscn" id="12_f5c0m"]
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_bcbcq"]
 sky_horizon_color = Color(0.66224277, 0.6717428, 0.6867428, 1)
@@ -27,10 +29,6 @@ glow_enabled = true
 [sub_resource type="PlaneMesh" id="PlaneMesh_cmany"]
 size = Vector2(40, 40)
 
-[sub_resource type="NavigationMesh" id="NavigationMesh_2dftf"]
-vertices = PackedVector3Array(-19.491013, 1, -19.468342, -19.491013, 1, 19.531658, 19.508987, 1, 19.531658, 19.508987, 1, -19.468342)
-polygons = [PackedInt32Array(3, 2, 0), PackedInt32Array(0, 2, 1)]
-
 [sub_resource type="PhysicsMaterial" id="PhysicsMaterial_2dftf"]
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_bcbcq"]
@@ -44,16 +42,6 @@ environment = SubResource("Environment_eu7l1")
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="."]
 mesh = SubResource("PlaneMesh_cmany")
-
-[node name="NavigationRegion3D" type="NavigationRegion3D" parent="."]
-navigation_mesh = SubResource("NavigationMesh_2dftf")
-
-[node name="StaticBody3D" type="StaticBody3D" parent="NavigationRegion3D"]
-physics_material_override = SubResource("PhysicsMaterial_2dftf")
-
-[node name="CollisionShape3D" type="CollisionShape3D" parent="NavigationRegion3D/StaticBody3D"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.04624176, 0, 0.083639145)
-shape = SubResource("BoxShape3D_bcbcq")
 
 [node name="Camera3D" type="Camera3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 0.64278764, 0.76604444, 0, -0.76604444, 0.64278764, 0, 6.6992855, 0)
@@ -102,3 +90,17 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.6305733, 1.692287, 0)
 
 [node name="CastingManager" type="Node" parent="."]
 script = ExtResource("10_casting_mgr")
+
+[node name="StaticBody3D" type="StaticBody3D" parent="."]
+physics_material_override = SubResource("PhysicsMaterial_2dftf")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="StaticBody3D"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.04624176, 0, 0.083639145)
+shape = SubResource("BoxShape3D_bcbcq")
+
+[node name="NAVMESH" type="Node3D" parent="."]
+script = ExtResource("11_kva58")
+map_size = Vector3(100, 1, 100)
+
+[node name="Wall" parent="." instance=ExtResource("12_f5c0m")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5.435469, 0.5, -3.081028)

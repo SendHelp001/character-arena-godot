@@ -12,13 +12,12 @@ var stats: Stats                         # runtime Stats component
 # ------------------------------
 # Node references
 # ------------------------------
-@onready var agent := $NavigationAgent3D
 @onready var ring := $SelectionRing
 @onready var stats_label := $StatsLabel
 
 # Component references
 # ------------------------------
-@onready var movement: UnitMovement = $UnitMovement
+@onready var movement = $UnitMovement
 @onready var combat: UnitCombat = $UnitCombat
 @onready var selection: UnitSelection = $UnitSelection
 @onready var ui: UnitUI = $UnitUI
@@ -42,7 +41,7 @@ func _ready():
 	
 	# Setup components
 	if movement:
-		movement.setup(self, stats, agent)
+		movement.setup(self, stats, null) # Agent is handled internally or removed
 	
 	if combat:
 		combat.setup(self, stats, movement)

@@ -7,4 +7,4 @@
 script = ExtResource("1")
 ability_name = "Fireball"
 icon = ExtResource("1_r4j3u")
-targeting_mode = 4
+targeting_mode = 1
