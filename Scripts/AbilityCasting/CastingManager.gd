@@ -25,6 +25,8 @@ const TEX_CIRCLE = preload("res://Resources/Textures/IndicatorCircle.tres")
 const TEX_ARROW = preload("res://Resources/Textures/IndicatorArrow.tres")
 const TEX_RING = preload("res://Resources/Textures/IndicatorRing.tres")
 
+const TERRAIN_MASK = 1 # Layer 1 for Terrain/Ground
+
 signal casting_started(ability_name: String)
 signal casting_finished()
 signal casting_cancelled()
@@ -158,6 +160,7 @@ func _process(_delta):
 	var ray = PhysicsRayQueryParameters3D.new()
 	ray.from = origin
 	ray.to = origin + direction * 1000
+	ray.collision_mask = TERRAIN_MASK # Only hit ground
 	
 	var result = space_state.intersect_ray(ray)
 	if not result: return
@@ -211,6 +214,7 @@ func _confirm_cast():
 			var ray = PhysicsRayQueryParameters3D.new()
 			ray.from = origin
 			ray.to = origin + direction * 1000
+			ray.collision_mask = TERRAIN_MASK
 			var result = space_state.intersect_ray(ray)
 			
 			if result:

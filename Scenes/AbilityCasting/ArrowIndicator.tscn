@@ -1,13 +1,20 @@
-[gd_scene load_steps=3 format=3]
-
-[ext_resource type="Material" path="res://Materials/AbilityIndicator.tres" id="1"]
+[gd_scene load_steps=3 format=3 uid="uid://cyn2po1fuq13y"]
 
 [sub_resource type="BoxMesh" id="1"]
-size = Vector3(1.0, 0.02, 1.0)
+size = Vector3(1, 0.02, 1)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_7xu73"]
+transparency = 1
+albedo_color = Color(0, 0.8, 1, 0.4)
+emission = Color(0, 0.5, 1, 1)
+emission_energy_multiplier = 0.5
+rim_enabled = true
+rim = 0.5
+disable_receive_shadows = true
 
 [node name="ArrowIndicator" type="Node3D"]
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.02, -0.5)
 mesh = SubResource("1")
-surface_material_override/0 = ExtResource("1")
+surface_material_override/0 = SubResource("StandardMaterial3D_7xu73")
