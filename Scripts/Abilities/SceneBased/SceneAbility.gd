@@ -1,7 +1,42 @@
+@tool
 extends Ability
 class_name SceneAbility
 
-@export var ability_scene: PackedScene
+@export var ability_scene: PackedScene:
+	set(value):
+		ability_scene = value
+		_sync_from_scene()
+
+func _sync_from_scene():
+	if not ability_scene:
+		return
+		
+	# Instantiate momentarily to read values
+	# We use can_instantiate check just in case
+	if not ability_scene.can_instantiate():
+		return
+		
+	var instance = ability_scene.instantiate()
+	if instance is AbilityRoot: # Ensure it's our visual root
+		# Sync Data
+		ability_name = instance.ability_name
+		icon = instance.icon
+		suggested_hotkey = instance.suggested_hotkey
+		
+		cooldown = instance.cooldown
+		mana_cost = instance.mana_cost
+		max_level = instance.max_level
+		
+		targeting_mode = instance.targeting_mode
+		cast_range = instance.cast_range
+		cast_radius = instance.cast_radius
+		
+		cast_point = instance.cast_point
+		requires_turn = instance.requires_turn
+		
+		print("🔄 Synced stats from Scene: ", ability_name)
+	
+	instance.queue_free()
 
 # Override _cast to use the scene's logic
 func _cast(caster: Node, target_pos: Vector3, level: int) -> bool:
@@ -13,22 +48,10 @@ func _cast(caster: Node, target_pos: Vector3, level: int) -> bool:
 	var instance = ability_scene.instantiate()
 	caster.get_tree().root.add_child(instance)
 	
-	# If the root has a cast method, call it
 	if instance.has_method("cast"):
 		var result = instance.cast(caster, target_pos, level)
-		# We might want to keep the instance alive if it has duration, 
-		# or queue_free it if it was just a logic runner.
-		# For now, let the instance manage its own life (e.g. projectile spawner)
-		# If it's just a data container, we should free it.
-		
-		# If it's a projectile spawner, it likely spawned something and can be freed?
-		# Or maybe the instance IS the projectile?
-		# Let's assume AbilityRoot handles its lifecycle or is just a spawner.
-		
-		# If the instance is an AbilityRoot, it might just spawn things.
-		# Let's queue_free it after a frame if it's just a spawner.
-		# But if it's a persistent effect, we shouldn't.
-		# For safety, let the AbilityRoot decide (e.g. call queue_free() in its cast())
+		# NOTE: logic instances usually need to persist if they are projectiles.
+		# If it's a spawner, it should queue_free itself.
 		return result
 		
 	return false

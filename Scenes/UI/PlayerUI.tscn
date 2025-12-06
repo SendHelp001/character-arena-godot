@@ -58,5 +58,5 @@ value = 100.0
 
 [node name="AbilityContainer" type="HBoxContainer" parent="Panel/MarginContainer/HBox/VBox"]
 layout_mode = 2
-size_flags_vertical = 3
+size_flags_vertical = 0
 theme_override_constants/separation = 5

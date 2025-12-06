@@ -1,7 +1,7 @@
 extends Control
 
 # Colors for the selection box
-@export var box_color := Color(0, 1, 0, 0.2)  # Transparent green background
+@export var box_color := Color(0, 0, 0, 0)  # Transparent green background
 @export var border_color := Color(0, 1, 0, 1.0) # Solid green border
 
 var is_dragging := false

@@ -1,6 +1,10 @@
-[gd_resource type="Resource" script_class="FireballAbility" load_steps=2 format=3 uid="uid://dg7bk5sb4n5lh"]
+[gd_resource type="Resource" script_class="FireballAbility" load_steps=3 format=3 uid="uid://dg7bk5sb4n5lh"]
 
 [ext_resource type="Script" uid="uid://dyomessnry8c1" path="res://Scripts/Abilities/FireballAbility.gd" id="1"]
+[ext_resource type="Texture2D" uid="uid://b5je4cjkhohk5" path="res://Resources/Abilities/Fireball_icon.png" id="1_r4j3u"]
 
 [resource]
 script = ExtResource("1")
+ability_name = "Fireball"
+icon = ExtResource("1_r4j3u")
+targeting_mode = 4

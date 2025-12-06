@@ -50,7 +50,24 @@ func setup(ability_inst: AbilityInstance, slot: int):
 	if ability_instance.current_cooldown > 0:
 		_on_cooldown_changed(ability_instance.current_cooldown, ability_instance.ability.cooldown)
 	
+	# Connect Button click
+	if not pressed.is_connected(_on_button_pressed):
+		pressed.connect(_on_button_pressed)
+	
 	_update_state()
+
+func _on_button_pressed():
+	if not ability_instance:
+		return
+	
+	# Trigger cast on the ability instance
+	# Ideally, we call back to the caster (Unit) or UnitAbilities component
+	# Since ability_instance is a child of UnitAbilities, we can get parent
+	var abilities_comp = ability_instance.get_parent()
+	if abilities_comp and abilities_comp.has_method("try_cast_ability"):
+		abilities_comp.try_cast_ability(slot_index)
+	else:
+		print("⚠️ AbilityButton: Could not find UnitAbilities component to cast.")
 
 func _set_empty():
 	text = "-"

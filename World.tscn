@@ -57,6 +57,7 @@ shape = SubResource("BoxShape3D_bcbcq")
 
 [node name="Camera3D" type="Camera3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 0.64278764, 0.76604444, 0, -0.76604444, 0.64278764, 0, 6.6992855, 0)
+fov = 90.0
 script = ExtResource("1_c6gwx")
 zoom_speed = 2.0
 min_height = 7.0
