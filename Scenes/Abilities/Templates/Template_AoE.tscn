@@ -1,0 +1,30 @@
+[gd_scene load_steps=5 format=3 uid="uid://ids0gn4rxgf6"]
+
+[ext_resource type="Script" uid="uid://dswc3yg2fgvue" path="res://Scripts/Abilities/SceneBased/AbilityRoot.gd" id="1"]
+[ext_resource type="Script" uid="uid://mluunprucqbt" path="res://Scripts/Abilities/SceneBased/AbilityIndicator.gd" id="2"]
+[ext_resource type="Texture2D" uid="uid://bgonh7henum1j" path="res://Resources/Textures/IndicatorCircle.tres" id="3"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_11vuc"]
+size = Vector3(0.03753662, 0.032684326, 1)
+
+[node name="Template_AoE" type="Node3D"]
+script = ExtResource("1")
+ability_name = "AoE Blast"
+targeting_mode = 2
+cast_radius = 4.0
+
+[node name="VisualIndicator" type="Node3D" parent="."]
+script = ExtResource("2")
+texture = ExtResource("3")
+
+[node name="Decal" type="Decal" parent="VisualIndicator"]
+transform = Transform3D(1, 0, 0, 0, -4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 0, 0)
+size = Vector3(8, 10, 8)
+texture_albedo = ExtResource("3")
+cull_mask = 1
+
+[node name="Hitbox" type="Area3D" parent="."]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Hitbox"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -9.1552734e-05, 0.0005340576, 0)
+shape = SubResource("BoxShape3D_11vuc")

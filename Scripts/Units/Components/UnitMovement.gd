@@ -44,6 +44,16 @@ func stop_movement():
 	if agent and unit:
 		agent.set_target_position(unit.global_position)
 
+func face_position(target_pos: Vector3):
+	"""Instantly rotate unit to face target position (Y-axis only)"""
+	if not unit: return
+	
+	var look_pos = target_pos
+	look_pos.y = unit.global_position.y
+	
+	if unit.global_position.distance_to(look_pos) > 0.1:
+		unit.look_at(look_pos, Vector3.UP)
+
 # ------------------------------
 # Movement Processing
 # ------------------------------

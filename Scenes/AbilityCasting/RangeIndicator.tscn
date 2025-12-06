@@ -1,0 +1,16 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Material" path="res://Materials/AbilityIndicator.tres" id="1"]
+
+[sub_resource type="TorusMesh" id="1"]
+inner_radius = 0.95
+outer_radius = 1.0
+rings = 32
+ring_segments = 4
+
+[node name="RangeIndicator" type="Node3D"]
+
+[node name="Ring" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.02, 0)
+mesh = SubResource("1")
+surface_material_override/0 = ExtResource("1")

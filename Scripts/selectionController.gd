@@ -3,6 +3,11 @@ extends Node3D
 @export var selectable_group := "unit"
 
 func _unhandled_input(event):
+	# Skip if casting (check via group)
+	var casting_mgr = get_tree().get_first_node_in_group("casting_manager")
+	if casting_mgr and casting_mgr.is_casting:
+		return
+	
 	# Handle Stop command (S key)
 	if event is InputEventKey and event.pressed and event.keycode == KEY_S:
 		var selected = get_tree().get_nodes_in_group("selected_unit")

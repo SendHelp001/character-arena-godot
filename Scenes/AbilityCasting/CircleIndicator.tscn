@@ -1,0 +1,27 @@
+[gd_scene load_steps=4 format=3]
+
+[ext_resource type="Material" path="res://Materials/AbilityIndicator.tres" id="1"]
+
+[sub_resource type="CylinderMesh" id="1"]
+top_radius = 1.0
+bottom_radius = 1.0
+height = 0.1
+
+[sub_resource type="TorusMesh" id="2"]
+inner_radius = 0.95
+outer_radius = 1.0
+rings = 16
+ring_segments = 4
+
+[node name="CircleIndicator" type="Node3D"]
+
+[node name="Fill" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.05, 0)
+mesh = SubResource("1")
+surface_material_override/0 = ExtResource("1")
+
+[node name="Border" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.05, 0)
+mesh = SubResource("2")
+# Use a brighter material for border if desired, or same
+surface_material_override/0 = ExtResource("1")

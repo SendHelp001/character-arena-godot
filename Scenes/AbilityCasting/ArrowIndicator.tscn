@@ -1,0 +1,13 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Material" path="res://Materials/AbilityIndicator.tres" id="1"]
+
+[sub_resource type="BoxMesh" id="1"]
+size = Vector3(1.0, 0.02, 1.0)
+
+[node name="ArrowIndicator" type="Node3D"]
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.02, -0.5)
+mesh = SubResource("1")
+surface_material_override/0 = ExtResource("1")

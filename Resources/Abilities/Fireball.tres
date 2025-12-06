@@ -1,13 +1,6 @@
-[gd_resource type="Resource" script_class="Ability" load_steps=2 format=3]
+[gd_resource type="Resource" script_class="FireballAbility" load_steps=2 format=3 uid="uid://dg7bk5sb4n5lh"]
 
-[ext_resource type="Script" path="res://Scripts/Abilities/FireballAbility.gd" id="1"]
+[ext_resource type="Script" uid="uid://dyomessnry8c1" path="res://Scripts/Abilities/FireballAbility.gd" id="1"]
 
 [resource]
 script = ExtResource("1")
-ability_name = "Fireball"
-description = "Launches a fireball dealing damage in an area"
-cooldown = 5.0
-mana_cost = 100.0
-max_level = 4
-cast_range = 0.0
-suggested_hotkey = "Q"

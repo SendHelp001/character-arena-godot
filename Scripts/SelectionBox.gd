@@ -9,25 +9,24 @@ var drag_start := Vector2.ZERO
 var current_mouse_pos := Vector2.ZERO
 
 func _input(event):
-	# Ignore input if mouse is over UI
-	if event is InputEventMouseButton or event is InputEventMouseMotion:
-		var mouse_pos = get_viewport().get_mouse_position()
-		# Check if mouse is over any Control nodes (UI)
-		var ui_rect = get_global_rect()
-		# Since this SelectionBox covers the whole screen, we need to check children
-		# But actually, we should check if PlayerUI is blocking input
-		var player_ui = get_tree().get_first_node_in_group("player_ui")
-		if player_ui and player_ui is CanvasLayer:
-			# Check if mouse is over the PlayerUI panel
-			for child in player_ui.get_children():
-				if child is Control and child.visible:
-					var rect = child.get_global_rect()
-					if rect.has_point(mouse_pos):
-						return # Ignore input, mouse is over UI
+	# Skip if casting (check via group)
+	var casting_mgr = get_tree().get_first_node_in_group("casting_manager")
+	if casting_mgr and casting_mgr.is_casting:
+		return
 	
 	if event is InputEventMouseButton:
 		if event.button_index == MOUSE_BUTTON_LEFT:
 			if event.pressed:
+				# Check if mouse is over UI before starting drag
+				var mouse_pos = get_viewport().get_mouse_position()
+				var player_ui = get_tree().get_first_node_in_group("player_ui")
+				if player_ui and player_ui is CanvasLayer:
+					for child in player_ui.get_children():
+						if child is Control and child.visible:
+							var rect = child.get_global_rect()
+							if rect.has_point(mouse_pos):
+								return # Ignore click, mouse is over UI
+				
 				# Start dragging
 				is_dragging = true
 				drag_start = event.position
