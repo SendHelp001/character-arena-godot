@@ -139,5 +139,8 @@ func get_stats() -> Stats:
 func get_abilities() -> UnitAbilities:
 	return abilities
 
+func get_movement():
+	return movement
+
 func get_team_id() -> int:
 	return team_id

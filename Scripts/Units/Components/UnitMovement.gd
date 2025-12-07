@@ -44,6 +44,7 @@ var current_path: PackedVector3Array
 var current_path_idx: int = 0
 var movement_active: bool = false
 var follow_target: Node = null
+var forced_facing_target: Vector3 = Vector3.INF # INF = No target
 
 # ------------------------------
 # Initialization
@@ -80,9 +81,19 @@ func set_follow_target(target: Node):
 func stop_movement():
 	movement_active = false
 	follow_target = null
+	forced_facing_target = Vector3.INF
 	current_path.clear()
 	if unit:
 		unit.velocity = Vector3.ZERO
+
+func look_at_point(pos: Vector3):
+	"""Commands unit to face a point without moving there"""
+	stop_movement() # turning interrupts moving
+	forced_facing_target = pos
+	forced_facing_target.y = unit.global_position.y # Keep horizontal
+
+func stop_looking():
+	forced_facing_target = Vector3.INF
 
 func is_navigation_finished() -> bool:
 	return not movement_active
@@ -103,6 +114,15 @@ func process_movement(delta: float):
 		return
 
 	if not movement_active:
+		# IDLE TURNING (For casting)
+		if forced_facing_target != Vector3.INF:
+			var dir = (forced_facing_target - unit.global_position).normalized()
+			dir.y = 0
+			if dir.length() > 0.01:
+				face_direction(dir, delta)
+			# No movement, just rotation
+			unit.velocity = Vector3.ZERO
+			unit.move_and_slide()
 		return
 
 	# 2. Path Following Logic

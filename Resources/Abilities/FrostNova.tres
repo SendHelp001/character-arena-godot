@@ -5,3 +5,6 @@
 [resource]
 script = ExtResource("1")
 ability_name = "Frost Nova"
+targeting_mode = 2
+cast_range = 4.0
+cast_radius = 3.0

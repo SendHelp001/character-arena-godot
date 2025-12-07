@@ -24,6 +24,9 @@ func equip_ability(slot: int, ability_resource: Ability):
 	var instance = AbilityInstance.new(ability_resource, unit)
 	add_child(instance)
 	ability_slots[slot] = instance
+	
+	# Connect signal to relay
+	instance.ability_used.connect(func(aname): ability_cast.emit(slot))
 
 func _get_casting_manager():
 	var managers = get_tree().get_nodes_in_group("casting_manager")

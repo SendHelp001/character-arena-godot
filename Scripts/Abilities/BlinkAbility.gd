@@ -9,7 +9,7 @@ func _init():
 	max_level = 4
 	cast_range = 12.0
 	cast_point = 0.0  # Instant!
-	requires_turn = false
+	requires_turn = true
 	targeting_mode = CastingMode.TargetingType.POINT
 	suggested_hotkey = "E"
 

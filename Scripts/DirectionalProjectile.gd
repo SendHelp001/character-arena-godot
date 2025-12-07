@@ -13,8 +13,12 @@ func setup(caster_unit: Node, dmg: float, range_val: float, speed_val: float = 2
 	max_range = range_val
 	speed = speed_val
 
-	connect("area_entered", _on_area_entered)
-	connect("body_entered", _on_body_entered)
+	# Safe Connection for area_entered
+	if not area_entered.is_connected(_on_area_entered):
+		area_entered.connect(_on_area_entered)
+	# Safe Connection for body_entered
+	if not body_entered.is_connected(_on_body_entered):
+		body_entered.connect(_on_body_entered)
 
 func _physics_process(delta):
 	var move_amount = speed * delta

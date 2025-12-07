@@ -10,7 +10,7 @@ func _init():
 	cast_range = 10.0
 	cast_radius = 5.0  # 5 meter AoE
 	cast_point = 0.2
-	requires_turn = false  # Instant cast, no turn needed
+	requires_turn = true  # Must face target
 	targeting_mode = CastingMode.TargetingType.CIRCULAR
 	suggested_hotkey = "W"
 
