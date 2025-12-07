@@ -68,6 +68,11 @@ func _process(delta: float):
 			_process_turning()
 		
 		CastState.CAST_POINT:
+			# Check for interruptions (movement cancels cast point)
+			if _should_interrupt_channel():  # Reuse same checks
+				cancel_cast()
+				return
+			
 			cast_point_timer -= delta
 			
 			# Update casting bar

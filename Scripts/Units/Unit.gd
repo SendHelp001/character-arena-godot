@@ -15,6 +15,8 @@ var stats: Stats                         # runtime Stats component
 @onready var ring := $SelectionRing
 @onready var stats_label := $StatsLabel
 
+
+
 # Component references
 # ------------------------------
 @onready var movement = $UnitMovement
@@ -22,6 +24,11 @@ var stats: Stats                         # runtime Stats component
 @onready var selection: UnitSelection = $UnitSelection
 @onready var ui: UnitUI = $UnitUI
 @onready var abilities: UnitAbilities = $UnitAbilities
+
+# UI Components
+const HEALTH_BAR_SCENE = preload("res://Scenes/UI/UnitHealthBar.tscn")
+const DAMAGE_NUMBER_SCENE = preload("res://Scenes/UI/DamageNumber.tscn")
+var health_bar: Node3D = null
 
 
 # ------------------------------
@@ -38,6 +45,13 @@ func _ready():
 	
 	if not stats_resource:
 		push_warning("Unit has no StatData assigned!")
+	
+	# Create health bar
+	_create_health_bar()
+	
+	# Connect to damage signal for damage numbers
+	if stats:
+		stats.damage_taken.connect(_on_damage_taken)
 	
 	# Setup components
 	if movement:
@@ -131,16 +145,37 @@ func take_damage(amount):
 			queue_free()
 
 # ------------------------------
+# UI Helpers
+# ------------------------------
+func _create_health_bar():
+	"""Create and position health bar above unit"""
+	if HEALTH_BAR_SCENE:
+		health_bar = HEALTH_BAR_SCENE.instantiate()
+		add_child(health_bar)
+		health_bar.position = Vector3(0, 2.5, 0)  # Above head
+		
+		if stats:
+			health_bar.setup(self)
+
+func _on_damage_taken(amount: float, damage_type: String):
+	"""Spawn damage number popup"""
+	if DAMAGE_NUMBER_SCENE:
+		var damage_num = DAMAGE_NUMBER_SCENE.instantiate()
+		get_tree().current_scene.add_child(damage_num)
+		damage_num.global_position = global_position + Vector3(0, 2, 0)
+		damage_num.setup(amount, damage_type)
+
+# ------------------------------
 # Public API - Stats & Abilities
 # ------------------------------
 func get_stats() -> Stats:
 	return stats
+
+func get_team_id() -> int:
+	return team_id
 
 func get_abilities() -> UnitAbilities:
 	return abilities
 
 func get_movement():
 	return movement
-
-func get_team_id() -> int:
-	return team_id

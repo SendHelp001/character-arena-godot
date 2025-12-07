@@ -5,12 +5,13 @@
 [ext_resource type="Script" uid="uid://d3nmhythni8qv" path="res://Scripts/Units/Components/UnitMovement.gd" id="3_ruynu"]
 [ext_resource type="Script" uid="uid://bdvhyxnqswdv1" path="res://Scripts/Units/Components/UnitCombat.gd" id="4_ii888"]
 [ext_resource type="Script" uid="uid://dqg78oxd8p48j" path="res://Scripts/Units/Components/UnitSelection.gd" id="5_kxan3"]
-[ext_resource type="PackedScene" uid="uid://dnffbm53dpea8" path="res://Scenes/Units/Mage/MageProjectile.tscn" id="5_y0k2v"]
+[ext_resource type="PackedScene" uid="uid://dnffbm53dpea8" path="res://Scenes/Abilities/Projectiles/FireballProjectile.tscn" id="5_y0k2v"]
 [ext_resource type="Script" uid="uid://dpak7jdwiossy" path="res://Scripts/Units/Components/UnitUI.gd" id="6_c15qa"]
 [ext_resource type="Script" uid="uid://bu07wvmo8p3lm" path="res://Scripts/Units/Components/UnitAbilities.gd" id="7_y0k2v"]
 [ext_resource type="Script" uid="uid://b0wf8k7k2i016" path="res://Scripts/Units/Components/HitboxComponent.gd" id="8_hitbox"]
 
 [sub_resource type="CylinderShape3D" id="CylinderShape3D_separation"]
+radius = 1.0
 
 [sub_resource type="TorusMesh" id="TorusMesh_qk68r"]
 inner_radius = 0.726
@@ -22,13 +23,14 @@ shading_mode = 0
 [sub_resource type="CapsuleMesh" id="CapsuleMesh_qk68r"]
 
 [sub_resource type="CylinderShape3D" id="CylinderShape3D_feet"]
-radius = 0.4
+radius = 0.6
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_body"]
 height = 2.2
 
 [node name="Unit" type="CharacterBody3D"]
 collision_layer = 2
+collision_mask = 1
 script = ExtResource("1_6efm0")
 stats_resource = ExtResource("2_kye2u")
 team_id = null
@@ -50,7 +52,7 @@ surface_material_override/0 = SubResource("StandardMaterial3D_lymsv")
 mesh = SubResource("CapsuleMesh_qk68r")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.42008805, 0)
 shape = SubResource("CylinderShape3D_feet")
 
 [node name="HitboxComponent" type="Area3D" parent="."]

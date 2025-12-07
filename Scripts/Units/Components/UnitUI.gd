@@ -46,12 +46,16 @@ func update_display():
 	stats_label.text = _build_stats_text()
 
 func _build_stats_text() -> String:
-	var unit_name = stats.stat_data.name if stats.stat_data.name else "Unit"
-
-	return "%s\nHP: %d/%d\nMP: %d/%d" % [
+	if not stats or not stats.stat_data:
+		return ""
+	
+	var stat_data = stats.stat_data
+	var unit_name = stat_data.name if stat_data.name else "Unit"
+	
+	return "%s\nHP: %.0f/%.0f\nMP: %.0f/%.0f" % [
 		unit_name,
-		stats.current_hp, stats.stat_data.max_hp,
-		int(stats.current_mana), stats.stat_data.mana
+		stats.current_hp, stat_data.max_hp,
+		stats.current_mana, stat_data.max_mana
 	]
 
 

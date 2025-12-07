@@ -210,18 +210,24 @@ func _execute_attack():
 func _spawn_projectile():
 	if not projectile_scene:
 		push_warning("Ranged unit has no projectile scene assigned!")
-		return
-	
-	var proj = projectile_scene.instantiate()
+		return # Keep the return
+	# Spawn projectile
+	var projectile = projectile_scene.instantiate()
 	
 	# Add to scene first
-	unit.get_tree().current_scene.add_child(proj)
+	unit.get_tree().current_scene.add_child(projectile)
 	
 	# Now global_position is valid
-	proj.global_position = unit.global_position + projectile_spawn_offset
-	proj.target = target
-	proj.owner_unit = unit
-	proj.damage = stats.stat_data.attack_damage
+	projectile.global_position = unit.global_position + Vector3(0, 1.5, 0)
+	
+	# Aim at target
+	if target:
+		projectile.look_at(target.global_position + Vector3(0, 1, 0), Vector3.UP)
+	
+	# Setup projectile (damage, speed, range)
+	if projectile.has_method("setup"):
+		var damage_amount = stats.stat_data.attack_damage if stats else 10
+		projectile.setup(unit, damage_amount, stats.stat_data.attack_range if stats else 10.0, 20.0)
 
 
 # ------------------------------

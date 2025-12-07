@@ -77,14 +77,14 @@ mouse_filter = 2
 script = ExtResource("7_selection_box")
 
 [node name="Warrior" parent="." instance=ExtResource("7_wygdx")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.090961576, 1.5, -6.468279)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.090961576, 1.0398037, -6.468279)
 team_id = 1
 
 [node name="Archer" parent="." instance=ExtResource("4_wygdx")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.3090894, -2.3841858e-07)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.024313, -2.3841858e-07)
 
 [node name="Mage" parent="." instance=ExtResource("7_bah7m")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.6305733, 1.692287, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.6305733, 0.9788108, 0)
 
 [node name="PlayerUI" parent="." instance=ExtResource("9_fvag4")]
 

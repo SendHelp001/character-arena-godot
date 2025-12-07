@@ -36,7 +36,7 @@ func _update_bars():
 	hp_bar.value = stats.current_hp
 	
 	# Update MP bar
-	mp_bar.max_value = stats.stat_data.mana
+	mp_bar.max_value = stats.stat_data.max_mana
 	mp_bar.value = stats.current_mana
 
 func _update_ability_buttons():
