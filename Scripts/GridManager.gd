@@ -141,7 +141,23 @@ func get_path_points(from_world: Vector3, to_world: Vector3) -> PackedVector3Arr
 	# _draw_path_line(id_path) # Debug Draw Raw?
 	_draw_path_line(world_path)
 		
+	_draw_path_line(world_path)
+		
 	return world_path
+
+func get_closest_walkable_point(world_pos: Vector3) -> Vector3:
+	if not active_region: 
+		return world_pos
+		
+	var grid_id = _world_to_grid(world_pos)
+	
+	# If already valid, return as is (snapped to center though? Maybe keep original if valid?)
+	# Actually, for Blink, snapping to center is safer to avoid wall clips.
+	if not astar.is_point_solid(grid_id):
+		return world_pos # Return exact click if valid
+		
+	var safe_id = _find_closest_walkable(grid_id)
+	return _grid_to_world(safe_id)
 
 func _find_closest_walkable(start_id: Vector2i, search_radius: int = 4) -> Vector2i:
 	# Spiral outward to find first non-solid cell

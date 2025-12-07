@@ -30,6 +30,23 @@ func _cast(caster: Node, target_pos: Vector3, level: int) -> bool:
 	# Keep Y position (same height)
 	target_pos.y = caster_pos.y
 	
+	# Grid Validation (Avoid Walls)
+	if GridManager:
+		target_pos = GridManager.get_closest_walkable_point(target_pos)
+		
+	# HEIGHT CORRECTION: Raycast down to find ground
+	var space_state = caster.get_world_3d().direct_space_state
+	var ray_origin = target_pos + Vector3(0, 50.0, 0) # Start high
+	var ray_end = target_pos + Vector3(0, -50.0, 0) # Cast down
+	var query = PhysicsRayQueryParameters3D.create(ray_origin, ray_end)
+	query.collision_mask = 1 # Terrain only
+	
+	var result = space_state.intersect_ray(query)
+	if result:
+		target_pos.y = result.position.y + 1.0 # Snap to ground + Half Height (Prevent burial)
+	else:
+		target_pos.y = caster_pos.y # Fallback
+	
 	# Teleport!
 	caster.global_position = target_pos
 	print("  Teleported to: ", target_pos)
