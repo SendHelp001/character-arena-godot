@@ -34,14 +34,25 @@ func _ready():
 	if not abilities_component: abilities_component = unit.get_node_or_null("UnitAbilities")
 	
 	# Connect signals
-	if combat_component and combat_component.has_signal("attack_executed"):
-		combat_component.attack_executed.connect(func(target): play_attack())
+	if combat_component:
+		if combat_component.has_signal("attack_windup_started"):
+			combat_component.attack_windup_started.connect(func(target): play_attack())
 		
-	if abilities_component and abilities_component.has_signal("ability_cast"):
-		abilities_component.ability_cast.connect(func(slot): play_cast())
+	# Connect to ability lifecycle events
+	if abilities_component:
+		# Get all ability slots and connect to their events
+		for slot_idx in range(6):
+			var ability_inst = abilities_component.get_ability(slot_idx)
+			if ability_inst and ability_inst.ability:
+				# Connect to cast_begin to play casting animation
+				ability_inst.ability.on_cast_begin.connect(_on_ability_cast_begin)
 	
 	if animation_player:
 		play_animation(anim_idle)
+
+func _on_ability_cast_begin(caster: Node, target_pos: Vector3, level: int):
+	"""Play cast animation when ability casting begins"""
+	play_cast()
 
 func _process(_delta):
 	if not animation_player: return
@@ -51,21 +62,46 @@ func _process(_delta):
 	if unit.velocity.length() > 0.1:
 		play_animation(anim_run)
 	else:
-		play_animation(anim_idle)
+		# If we are not moving, we might be attacking (winding up).
+		# We need to be careful not to switch to IDLE if we are winding up.
+		# UnitCombat manages windup_timer, but UnitMovement manages velocity.
+		# If windup is active, velocity should be 0 (we stop movement).
+		# So we need to know if we are in windup to avoid overriding with Idle.
+		# Or, play_attack sets a flag?
+		
+		# For now, let's rely on 'current_anim' priority or explicit state.
+		# Ideally, play_attack sets 'current_anim' to attack.
+		# If velocity is 0, we fall through here.
+		# We should only play idle if NOT playing attack.
+		# But 'play_animation' checks 'if current_anim == anim_name'.
+		# The issue is _process runs every frame.
+		
+		# If we just started attack, current_anim is 'attack'.
+		# velocity is 0.
+		# this else block runs.
+		# calls play_animation(anim_idle).
+		# checks if current_anim == anim_idle? No.
+		# Plays idle. Overrides attack immediately.
+		
+		# Fix: Check if attack animation is playing and still valid?
+		# Or just check if combat is aggressive/winding up?
+		
+		var is_winding_up = false
+		if combat_component and "windup_timer" in combat_component and combat_component.windup_timer > 0:
+			is_winding_up = true
+			
+		if not is_winding_up and current_anim != anim_attack: # Basic check
+			play_animation(anim_idle)
+		# If winding up, do nothing (let attack play)
+		# If attack anim finished but still winding up (unlikely for short anims), loop?
+		# Usually anim duration > windup.
 
 # ------------------------------------------------------------------------------
 # Public API
 # ------------------------------------------------------------------------------
 func play_attack():
-	play_animation(anim_attack, true, 0.2) # Lock for windup? Or let combat unlock it?
-	# Typically attack anims should play fully or until backswing.
-	# For now, let's just play it and unlock after a timer or use signal.
-	# Actually, best to just play it and let movement override if user cancels?
-	# If we use 'is_locked', we need a way to unlock.
-	
-	# Let's keep it simple: Attack overrides Idle/Run, but moving overrides Attack (cancellation).
-	# So we don't lock for attack, unless we want to forced visual.
-	# But user wants "Stop" to cancel, so NOT locking is better.
+	# Play attack animation.
+	# We don't lock it because we want it cancellable by movement (velocity > 0 check in _process).
 	play_animation(anim_attack)
 
 func play_cast():

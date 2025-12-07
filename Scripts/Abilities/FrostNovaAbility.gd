@@ -2,26 +2,18 @@ extends Ability
 class_name FrostNovaAbility
 
 func _init():
+	# Defaults now in .tres resource file
 	ability_name = "Frost Nova"
-	description = "Creates an AoE slow at target location"
-	cooldown = 8.0
-	mana_cost = 125.0
-	max_level = 4
-	cast_range = 10.0
-	cast_radius = 5.0  # 5 meter AoE
-	cast_point = 0.2
-	requires_turn = true  # Must face target
-	targeting_mode = CastingMode.TargetingType.CIRCULAR
-	suggested_hotkey = "W"
+	
+	# Connect to lifecycle events
+	on_cast_point_finish.connect(_execute_frost_nova)
 
-func _cast(caster: Node, target_pos: Vector3, level: int) -> bool:
+func _execute_frost_nova(caster: Node, target_pos: Vector3, level: int):
+	"""Apply AoE damage at target location"""
 	print("❄️ Frost Nova cast at level %d!" % level)
 	
-	# The target_pos passed here is ALREADY clamped and positioned by CastingManager
-	# So we should use it directly!
-	
-	# Calculate damage and slow
-	var damage = 75 + (level * 30)
+	# Calculate damage
+	var damage = base_amount + (amount_per_level * (level - 1))
 	
 	# Find all units in AoE
 	var units = caster.get_tree().get_nodes_in_group("unit")
@@ -48,4 +40,3 @@ func _cast(caster: Node, target_pos: Vector3, level: int) -> bool:
 					print("  Hit %s for %d damage!" % [unit.name, damage])
 	
 	print("  Total enemies hit: %d" % hit_count)
-	return true

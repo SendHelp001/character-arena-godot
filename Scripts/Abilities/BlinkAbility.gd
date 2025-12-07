@@ -2,18 +2,14 @@ extends Ability
 class_name BlinkAbility
 
 func _init():
+	# Defaults now in .tres resource file
 	ability_name = "Blink"
-	description = "Teleports to target location"
-	cooldown = 12.0
-	mana_cost = 75.0
-	max_level = 4
-	cast_range = 12.0
-	cast_point = 0.0  # Instant!
-	requires_turn = true
-	targeting_mode = CastingMode.TargetingType.POINT
-	suggested_hotkey = "E"
+	
+	# Connect to lifecycle events
+	on_cast_point_finish.connect(_execute_blink)
 
-func _cast(caster: Node, target_pos: Vector3, level: int) -> bool:
+func _execute_blink(caster: Node, target_pos: Vector3, level: int):
+	"""Teleport caster to target position"""
 	print("✨ Blink cast at level %d!" % level)
 	
 	# Clamp to max range
@@ -43,12 +39,10 @@ func _cast(caster: Node, target_pos: Vector3, level: int) -> bool:
 	
 	var result = space_state.intersect_ray(query)
 	if result:
-		target_pos.y = result.position.y + 1.0 # Snap to ground + Half Height (Prevent burial)
+		target_pos.y = result.position.y + 1.0 # Snap to ground + Half Height
 	else:
 		target_pos.y = caster_pos.y # Fallback
 	
 	# Teleport!
 	caster.global_position = target_pos
 	print("  Teleported to: ", target_pos)
-	
-	return true

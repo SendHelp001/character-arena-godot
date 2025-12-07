@@ -5,6 +5,12 @@
 [resource]
 script = ExtResource("1")
 ability_name = "Frost Nova"
+description = "Creates an AoE slow at target location"
+suggested_hotkey = "W"
+cooldown = 8.0
+mana_cost = 125.0
 targeting_mode = 2
-cast_range = 4.0
-cast_radius = 3.0
+cast_radius = 5.0
+cast_point = 0.2
+base_amount = 75.0
+amount_per_level = 30.0

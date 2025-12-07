@@ -5,6 +5,7 @@ class_name UnitCombat
 # Signals
 # ------------------------------
 signal target_acquired(target: Node)
+signal attack_windup_started(target: Node)
 signal attack_executed(target: Node)
 signal combat_mode_changed(is_aggressive: bool)
 
@@ -40,6 +41,7 @@ var movement  # UnitMovement type
 var target: Node = null
 var attack_timer := 0.0
 var auto_target_timer := 0.0
+var windup_timer := 0.0  # Time remaining in windup
 
 # ------------------------------
 # Initialization
@@ -67,6 +69,10 @@ func is_aggressive() -> bool:
 # Target Management
 # ------------------------------
 func set_target(new_target: Node):
+	# Switching targets cancels current windup
+	if target != new_target:
+		cancel_windup()
+		
 	target = new_target
 	if new_target:
 		# Setting a target puts unit in aggressive mode
@@ -77,12 +83,20 @@ func get_current_target() -> Node:
 	return target
 
 func clear_target():
+	cancel_windup()
 	target = null
 
 func stop_all_actions():
 	"""Stop all combat actions and return to passive mode"""
+	cancel_windup()
 	set_aggressive_mode(false)
 	clear_target()
+
+func cancel_windup():
+	if windup_timer > 0:
+		windup_timer = 0.0
+		# Optional: Emit a signal that windup was cancelled?
+		# For now, just silently stop it.
 
 # ------------------------------
 # Combat Processing
@@ -93,6 +107,27 @@ func process_combat(delta: float):
 	if stats:
 		stats.regen_mana(delta)
 	
+	# Handle Windup
+	if windup_timer > 0:
+		windup_timer -= delta
+		
+		# Check if target is still valid/alive during windup
+		if not target or not is_instance_valid(target) or (target.has_method("get_stats") and target.get_stats().current_hp <= 0):
+			cancel_windup()
+			return
+			
+		# Check if we moved? UnitMovement usually handles moving unit, 
+		# so if velocity > 0 maybe cancel? 
+		# But UnitMovement.stop_movement() should be called when we start attack.
+		# If user manually moves, Unit.gd calls set_move_target -> movement.set_target_position
+		# which doesn't directly call us, but Unit.set_move_target calls combat.set_aggressive_mode(false)
+		# which calls clear_target -> cancel_windup. So that path is covered.
+		
+		if windup_timer <= 0:
+			_execute_attack()
+			
+		return # Don't look for new attacks while winding up
+
 	_process_attack()
 	
 	# Only auto-target if in aggressive mode
@@ -112,6 +147,21 @@ func _process_attack():
 	if not stats or not stats.stat_data:
 		return
 	
+	# Check facing
+	if movement:
+		var dir_to_target = (target.global_position - unit.global_position).normalized()
+		var forward = -unit.global_transform.basis.z
+		var dot = forward.dot(dir_to_target)
+		
+		# Use movement's face_requirement or a default high value for attacking (like 0.9 for ~25 degrees)
+		var attack_face_requirement = movement.face_requirement if "face_requirement" in movement else 0.9
+		
+		if dot < attack_face_requirement:
+			movement.look_at_point(target.global_position)
+			return # Not facing yet, don't attack
+		else:
+			movement.stop_looking() # We are facing, stop forcing look so we can attack/move freely if needed
+	
 	var dist = unit.global_position.distance_to(target.global_position)
 	var attack_range = stats.stat_data.attack_range
 	
@@ -120,12 +170,22 @@ func _process_attack():
 		if movement and not movement.is_navigation_finished():
 			movement.stop_movement()
 		
-		if attack_timer <= 0:
-			_execute_attack()
+		if attack_timer <= 0 and windup_timer <= 0:
+			_start_windup()
 	else:
 		# Move toward target if out of range
 		if movement:
 			movement.set_target_position(target.global_position)
+
+func _start_windup():
+	if not stats or not stats.stat_data: return
+	
+	windup_timer = stats.stat_data.attack_point
+	attack_windup_started.emit(target)
+	
+	# Ensure we stay still
+	if movement:
+		movement.stop_movement()
 
 func _execute_attack():
 	if not stats or not stats.stat_data or not target:

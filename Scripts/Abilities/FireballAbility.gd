@@ -2,29 +2,29 @@ extends Ability
 class_name FireballAbility
 
 func _init():
-	ability_name = "Fireball"
-	description = "Shoots a fireball in a straight line"
+	# Defaults now in .tres resource file
+	ability_name = "Fireball" 
 	
-	# Stats
-	cooldown = 5.0
-	mana_cost = 100.0
-	max_level = 4
+	# Connect to lifecycle events
+	on_cast_point_finish.connect(_spawn_fireball)
+
+func _spawn_fireball(caster: Node, target_pos: Vector3, level: int):
+	"""Spawn fireball projectile when cast point finishes"""
+	if not projectile_scene:
+		push_warning("Fireball has no projectile scene!")
+		return
 	
-	# Targeting
-	targeting_mode = CastingMode.TargetingType.DIRECTIONAL
-	cast_range = 15.0
-	cast_radius = 0.5 # Width of projectile
+	var proj = projectile_scene.instantiate()
+	caster.get_tree().current_scene.add_child(proj)
 	
-	# Mechanics
-	cast_point = 0.3
-	requires_turn = true
+	# Setup projectile transform
+	var spawn_pos = caster.global_position + Vector3(0, 1, 0)
+	proj.global_position = spawn_pos
+	proj.look_at(Vector3(target_pos.x, spawn_pos.y, target_pos.z), Vector3.UP)
 	
-	# Effects
-	effect_type = "DAMAGE"
-	damage_type = "MAGICAL"
-	base_amount = 50.0
-	amount_per_level = 25.0
+	# Pass data to projectile
+	if proj.has_method("setup"):
+		var dmg = calculate_value(caster, level)
+		proj.setup(caster, dmg, cast_range, 20.0)
 	
-	# Visuals
-	suggested_hotkey = "Q"
-	projectile_scene = preload("res://Scenes/Abilities/Projectiles/FireballProjectile.tscn")
+	print("🔥 Fireball spawned! Damage: %d" % calculate_value(caster, level))
