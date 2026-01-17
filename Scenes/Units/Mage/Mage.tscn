@@ -5,7 +5,7 @@
 [ext_resource type="Script" uid="uid://d3nmhythni8qv" path="res://Scripts/Units/Components/UnitMovement.gd" id="3_ruynu"]
 [ext_resource type="Script" uid="uid://bdvhyxnqswdv1" path="res://Scripts/Units/Components/UnitCombat.gd" id="4_ii888"]
 [ext_resource type="Script" uid="uid://dqg78oxd8p48j" path="res://Scripts/Units/Components/UnitSelection.gd" id="5_kxan3"]
-[ext_resource type="PackedScene" uid="uid://dnffbm53dpea8" path="res://Scenes/Abilities/Projectiles/FireballProjectile.tscn" id="5_y0k2v"]
+[ext_resource type="PackedScene" uid="uid://dnffbm53dpea9" path="res://Scenes/Units/Mage/MageProjectile.tscn" id="5_y0k2v"]
 [ext_resource type="Script" uid="uid://dpak7jdwiossy" path="res://Scripts/Units/Components/UnitUI.gd" id="6_c15qa"]
 [ext_resource type="Script" uid="uid://bu07wvmo8p3lm" path="res://Scripts/Units/Components/UnitAbilities.gd" id="7_y0k2v"]
 [ext_resource type="Script" uid="uid://b0wf8k7k2i016" path="res://Scripts/Units/Components/HitboxComponent.gd" id="8_hitbox"]
@@ -19,6 +19,7 @@ outer_radius = 0.674
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_lymsv"]
 shading_mode = 0
+no_depth_test = true
 
 [sub_resource type="CapsuleMesh" id="CapsuleMesh_qk68r"]
 
@@ -44,7 +45,7 @@ monitorable = false
 shape = SubResource("CylinderShape3D_separation")
 
 [node name="SelectionRing" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.8779901, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.05, 0)
 mesh = SubResource("TorusMesh_qk68r")
 surface_material_override/0 = SubResource("StandardMaterial3D_lymsv")
 
@@ -64,6 +65,7 @@ shape = SubResource("CapsuleShape3D_body")
 [node name="StatsLabel" type="Label3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.520485, 0)
 billboard = 1
+no_depth_test = true
 
 [node name="UnitMovement" type="Node" parent="."]
 script = ExtResource("3_ruynu")

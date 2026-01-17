@@ -6,6 +6,9 @@ extends Camera3D
 @export var max_height := 50.0       # Max Y
 @export var edge_scroll_margin := 20 # Pixels from screen edge to start scrolling
 
+func _ready():
+	add_to_group("MainCamera")
+
 func _process(delta):
 	var input_dir = Vector3.ZERO
 	var mouse_pos = get_viewport().get_mouse_position()

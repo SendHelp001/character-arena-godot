@@ -19,6 +19,19 @@ config/icon="res://icon.svg"
 
 GridManager="*res://Scripts/GridManager.gd"
 
+[editor_plugins]
+
+enabled=PackedStringArray("res://addons/MarchingSquaresTerrain/plugin.cfg")
+
+[file_customization]
+
+folder_colors={
+"res://ResourceStats/": "yellow",
+"res://Scenes/": "green",
+"res://Scenes/Abilities/": "green",
+"res://Scripts/": "red"
+}
+
 [physics]
 
 3d/physics_engine="Jolt Physics"

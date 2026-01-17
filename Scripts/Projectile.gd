@@ -5,6 +5,14 @@ class_name Projectile
 var target: Node
 var owner_unit: Node
 var damage: int = 10
+var max_range: float = 0.0
+
+func setup(caster_unit: Node, dmg: int, range_val: float, speed_val: float = 15.0, target_unit: Node = null):
+	owner_unit = caster_unit
+	damage = dmg
+	max_range = range_val
+	speed = speed_val
+	target = target_unit
 
 func _physics_process(delta):
 	if not target or not is_instance_valid(target):

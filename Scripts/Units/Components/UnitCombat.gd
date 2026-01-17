@@ -227,7 +227,7 @@ func _spawn_projectile():
 	# Setup projectile (damage, speed, range)
 	if projectile.has_method("setup"):
 		var damage_amount = stats.stat_data.attack_damage if stats else 10
-		projectile.setup(unit, damage_amount, stats.stat_data.attack_range if stats else 10.0, 20.0)
+		projectile.setup(unit, damage_amount, stats.stat_data.attack_range if stats else 10.0, 20.0, target)
 
 
 # ------------------------------

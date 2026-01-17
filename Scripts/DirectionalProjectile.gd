@@ -7,7 +7,7 @@ var max_range: float = 0.0
 var distance_traveled: float = 0.0
 var caster: Node = null
 
-func setup(caster_unit: Node, dmg: float, range_val: float, speed_val: float = 20.0):
+func setup(caster_unit: Node, dmg: float, range_val: float, speed_val: float = 20.0, _target: Node = null):
 	caster = caster_unit
 	damage = dmg
 	max_range = range_val

@@ -63,6 +63,16 @@ func _select_units_in_box():
 	var rect = _get_selection_rect()
 	var cam = get_viewport().get_camera_3d()
 	
+	if not cam:
+		# Fallback: Try to find camera in "MainCamera" group
+		var cams = get_tree().get_nodes_in_group("MainCamera")
+		if cams.size() > 0:
+			cam = cams[0]
+	
+	if not cam:
+		push_warning("SelectionBox: No active 3D camera found, cannot select units.")
+		return
+	
 	var units = get_tree().get_nodes_in_group("unit")
 	var selected_count = 0
 	
@@ -75,10 +85,13 @@ func _select_units_in_box():
 	
 	if rect.size.length() < 5.0:
 		# Too small, treat as single click
-		var controller = get_tree().root.find_child("SelectionController", true, false)
-		var world = get_parent().get_parent()
-		var selection_controller = world.get_node("SelectionController")
+		# Use robust Group retrieval
+		var selection_controller = get_tree().get_first_node_in_group("InputHandlers")
 		
+		if not selection_controller:
+			# Fallback
+			selection_controller = get_tree().root.find_child("SelectionController", true, false)
+
 		if selection_controller and selection_controller.has_method("try_select_at"):
 			selection_controller.try_select_at(drag_start, keep_existing)
 		return

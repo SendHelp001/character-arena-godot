@@ -2,6 +2,9 @@ extends Node3D
 
 @export var selectable_group := "unit"
 
+func _ready():
+	add_to_group("InputHandlers")
+
 func _unhandled_input(event):
 	# Skip if casting (check via group)
 	var casting_mgr = get_tree().get_first_node_in_group("casting_manager")
@@ -20,7 +23,12 @@ func _unhandled_input(event):
 	
 	if event is InputEventMouseButton and event.pressed:
 		var cam = get_viewport().get_camera_3d()
-		if cam == null:
+		if not cam:
+			var cams = get_tree().get_nodes_in_group("MainCamera")
+			if cams.size() > 0:
+				cam = cams[0]
+		
+		if not cam:
 			return
 
 		var mouse_pos = get_viewport().get_mouse_position()
@@ -31,7 +39,11 @@ func _unhandled_input(event):
 		ray.from = origin
 		ray.to = origin + dir * 2000
 
-		var result = get_viewport().get_world_3d().direct_space_state.intersect_ray(ray)
+		var world_3d = get_viewport().get_world_3d()
+		if not world_3d or not world_3d.direct_space_state:
+			return
+
+		var result = world_3d.direct_space_state.intersect_ray(ray)
 
 		# Check if shift is held for multi-select
 		var _multi_select = Input.is_key_pressed(KEY_SHIFT)
@@ -74,7 +86,12 @@ func _unhandled_input(event):
 # -----------------------------
 func try_select_at(screen_pos: Vector2, multi_select: bool = false):
 	var cam = get_viewport().get_camera_3d()
-	if cam == null: 
+	if not cam:
+		var cams = get_tree().get_nodes_in_group("MainCamera")
+		if cams.size() > 0:
+			cam = cams[0]
+			
+	if not cam: 
 		return
 
 	var origin = cam.project_ray_origin(screen_pos)
@@ -84,7 +101,11 @@ func try_select_at(screen_pos: Vector2, multi_select: bool = false):
 	ray.from = origin
 	ray.to = origin + dir * 2000
 
-	var result = get_viewport().get_world_3d().direct_space_state.intersect_ray(ray)
+	var world_3d = get_viewport().get_world_3d()
+	if not world_3d or not world_3d.direct_space_state:
+		return
+
+	var result = world_3d.direct_space_state.intersect_ray(ray)
 	
 	if result:
 		var collider = result.collider

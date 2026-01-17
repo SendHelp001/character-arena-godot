@@ -28,6 +28,10 @@ func _ready():
 	_setup_debug_draw()
 	print("[GridManager] Autoload ready. Waiting for GridRegion...")
 
+func _process(_delta):
+	if debug_enabled:
+		_update_debug_grid()
+
 func register_region(region_node: Node3D):
 	print("[GridManager] Region registered: ", region_node.name)
 	active_region = region_node
@@ -255,21 +259,100 @@ func _clamp_to_grid(id: Vector2i) -> Vector2i:
 		clamp(id.y, 0, map_rect.size.y - 1)
 	)
 
-# -----------------------------------------------------------
-# Debug Visualization
-# -----------------------------------------------------------
+var debug_enabled: bool = false
+
+var debug_texture_mesh: MeshInstance3D
+
 func _setup_debug_draw():
+	# Path Line Debug
 	debug_mesh_instance = MeshInstance3D.new()
 	debug_mesh_instance.name = "DebugPathParams"
 	add_child(debug_mesh_instance)
 	
-	# Create a Material
 	var mat = StandardMaterial3D.new()
 	mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
 	mat.albedo_color = Color.CYAN
 	mat.vertex_color_use_as_albedo = false
-	
 	debug_mesh_instance.material_override = mat
+
+	# Grid Debug (Texture Plane)
+	debug_texture_mesh = MeshInstance3D.new()
+	debug_texture_mesh.name = "DebugGridTexture"
+	debug_texture_mesh.visible = false
+	debug_texture_mesh.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	
+	# CRITICAL FIX: Huge AABB to prevent culling when looking away from center
+	debug_texture_mesh.custom_aabb = AABB(Vector3(-100000, -100000, -100000), Vector3(200000, 200000, 200000))
+	add_child(debug_texture_mesh)
+	
+	var plane_mesh = PlaneMesh.new()
+	debug_texture_mesh.mesh = plane_mesh
+	
+	# Shader Material for "Grid" look (Gaps)
+	var shader = load("res://debug_grid.gdshader")
+	if shader:
+		var shader_mat = ShaderMaterial.new()
+		shader_mat.shader = shader
+		debug_texture_mesh.material_override = shader_mat
+	else:
+		push_error("GridManager: Could not load debug_grid.gdshader!")
+
+func _update_debug_grid():
+	if not active_region or not debug_enabled: return
+	
+	var start_t = Time.get_ticks_msec()
+	
+	# Resize Plane to match map
+	var plane = debug_texture_mesh.mesh as PlaneMesh
+	plane.size = Vector2(map_rect.size.x * cell_size, map_rect.size.y * cell_size)
+	
+	# Center it
+	var center_x = grid_origin.x + (plane.size.x / 2.0)
+	var center_z = grid_origin.z + (plane.size.y / 2.0)
+	debug_texture_mesh.global_position = Vector3(center_x, active_region.global_position.y + 0.05, center_z)
+	
+	# Create/Update Image
+	var width = map_rect.size.x
+	var height = map_rect.size.y
+	
+	var img = Image.create(width, height, false, Image.FORMAT_RGBA8)
+	
+	# Colors
+	var col_blocked = Color(1, 0, 0, 0.5)
+	var col_walkable = Color(0, 1, 0, 0.2) # Slightly more visible
+	
+	for y in range(height):
+		for x in range(width):
+			var id = Vector2i(x, y)
+			if astar.is_point_solid(id):
+				img.set_pixel(x, y, col_blocked)
+			else:
+				img.set_pixel(x, y, col_walkable)
+				
+	var tex = ImageTexture.create_from_image(img)
+	
+	var mat = debug_texture_mesh.material_override as ShaderMaterial
+	if mat:
+		mat.set_shader_parameter("grid_texture", tex)
+		mat.set_shader_parameter("grid_size", Vector2(width, height))
+	
+	print("[GridManager] Texture Debug Grid updated in %dms" % (Time.get_ticks_msec() - start_t))
+
+func _input(event):
+	if event is InputEventKey and event.pressed and event.keycode == KEY_F6:
+		_toggle_debug()
+
+func _toggle_debug():
+	debug_enabled = not debug_enabled
+	print("[GridManager] Debug View: ", debug_enabled)
+	
+	if debug_enabled:
+		_update_debug_grid()
+		if debug_texture_mesh:
+			debug_texture_mesh.visible = true
+	else:
+		if debug_texture_mesh:
+			debug_texture_mesh.visible = false
 
 func _draw_path_line(points: PackedVector3Array):
 	if points.size() < 2: 
@@ -279,7 +362,7 @@ func _draw_path_line(points: PackedVector3Array):
 	var mesh = ImmediateMesh.new()
 	mesh.surface_begin(Mesh.PRIMITIVE_LINE_STRIP)
 	for p in points:
-		mesh.surface_add_vertex(p + Vector3(0, 0.5, 0)) # Lift slightly
+		mesh.surface_add_vertex(p + Vector3(0, 0.6, 0)) # Lift to match grid
 	mesh.surface_end()
 	
 	debug_mesh_instance.mesh = mesh
