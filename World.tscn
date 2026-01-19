@@ -1,17 +1,13 @@
 [gd_scene load_steps=19 format=3 uid="uid://cfrhyxgrw488v"]
 
-
-[ext_resource type="Script" uid="uid://1ssoj02b8pxp" path="res://Scripts/UISetup.gd" id="1_fv4w7"]
-
-[ext_resource type="Script" uid="uid://cio7gctac5qpo" path="res://Scripts/FPSLabel.gd" id="4_fps"]
-[ext_resource type="PackedScene" uid="uid://bwcncnyxg7pgj" path="res://Scenes/Units/Archer/Archer.tscn" id="4_wygdx"]
-[ext_resource type="PackedScene" uid="uid://ryf8eh1f7mvt" path="res://Scenes/Units/Mage/Mage.tscn" id="7_bah7m"]
-
-[ext_resource type="PackedScene" uid="uid://csx2eoajop3km" path="res://Scenes/Units/Warrior/Warrior.tscn" id="7_wygdx"]
-[ext_resource type="PackedScene" uid="uid://b172h8rtydne6" path="res://Scenes/UI/PlayerUI.tscn" id="9_fvag4"]
-[ext_resource type="Script" uid="uid://bxod6n47w0hu5" path="res://Scripts/AbilityCasting/CastingManager.gd" id="10_casting_mgr"]
-
-[ext_resource type="PackedScene" uid="uid://b8q7x4y201w3" path="res://Scenes/Environment/Wall.tscn" id="12_f5c0m"]
+[ext_resource type="Script" uid="uid://1ssoj02b8pxp" path="res://src/Scripts/UISetup.gd" id="1_fv4w7"]
+[ext_resource type="Script" uid="uid://cio7gctac5qpo" path="res://src/Scripts/FPSLabel.gd" id="4_fps"]
+[ext_resource type="PackedScene" uid="uid://bwcncnyxg7pgj" path="res://src/Scenes/Units/Archer/Archer.tscn" id="4_wygdx"]
+[ext_resource type="PackedScene" uid="uid://ryf8eh1f7mvt" path="res://src/Scenes/Units/Mage/Mage.tscn" id="7_bah7m"]
+[ext_resource type="PackedScene" uid="uid://csx2eoajop3km" path="res://src/Scenes/Units/Warrior/Warrior.tscn" id="7_wygdx"]
+[ext_resource type="PackedScene" uid="uid://b172h8rtydne6" path="res://src/Scenes/UI/PlayerUI.tscn" id="9_fvag4"]
+[ext_resource type="Script" uid="uid://bxod6n47w0hu5" path="res://src/Scripts/AbilityCasting/CastingManager.gd" id="10_casting_mgr"]
+[ext_resource type="PackedScene" uid="uid://b8q7x4y201w3" path="res://src/Scenes/Environment/Wall.tscn" id="12_f5c0m"]
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_bcbcq"]
 sky_horizon_color = Color(0.66224277, 0.6717428, 0.6867428, 1)

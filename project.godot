@@ -11,13 +11,13 @@ config_version=5
 [application]
 
 config/name="test"
-run/main_scene="res://Scenes/Sandbox.tscn"
+run/main_scene="res://src/Scenes/Sandbox.tscn"
 config/features=PackedStringArray("4.5", "Forward Plus")
 config/icon="res://icon.svg"
 
 [autoload]
 
-
+GridManager="*res://Scripts/GridManager.gd"
 
 [editor_plugins]
 
@@ -26,10 +26,10 @@ enabled=PackedStringArray("res://addons/MarchingSquaresTerrain/plugin.cfg")
 [file_customization]
 
 folder_colors={
-"res://ResourceStats/": "yellow",
-"res://Scenes/": "green",
-"res://Scenes/Abilities/": "green",
-"res://Scripts/": "red"
+"res://src/ResourceStats/": "yellow",
+"res://src/Scenes/": "green",
+"res://src/Scenes/Abilities/": "green",
+"res://src/Scripts/": "red"
 }
 
 [input]
