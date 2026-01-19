@@ -22,7 +22,7 @@ const WEAPON_MAGE = preload("res://src/items/definitions/weapon_wand.tres")
 @onready var camera_boom := $CameraBoom
 @onready var camera := $CameraBoom/Camera3D
 
-var hud_scene = preload("res://src/ui/scenes/scenes/PlayerHUD.tscn")
+var hud_scene = preload("res://src/ui/scenes/PlayerHUD.tscn")
 var hud_instance = null
 
 var gravity = ProjectSettings.get_setting("physics/3d/default_gravity")
@@ -51,6 +51,10 @@ func _ready():
 		# Connect Health Update
 		if stats:
 			stats.health_changed.connect(_on_health_changed)
+			
+	# Initialize speed from stats
+	if stats_resource:
+		speed = stats_resource.move_speed
 
 func _on_health_changed(new_val, max_val):
 	if hud_instance:
@@ -137,6 +141,9 @@ func equip_weapon(new_weapon_data: StatData):
 		# Update Health? Maybe keep current percentage?
 		# For now, full reset for simplicity or just max_hp update
 		stats.emit_signal("max_hp_changed", new_weapon_data.max_hp)
+		
+	# Update Speed
+	speed = new_weapon_data.move_speed
 	
 	if hud_instance:
 		hud_instance.update_weapon_info(new_weapon_data.name)
@@ -152,4 +159,3 @@ func equip_weapon(new_weapon_data: StatData):
 		# Heuristic: If range > 4, it's ranged
 		combat.is_ranged = new_weapon_data.attack_range > 4.0
 		# Update generic stats on combat if needed (combat pulls from stats component mostly)
-

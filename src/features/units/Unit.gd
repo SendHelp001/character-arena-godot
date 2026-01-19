@@ -26,8 +26,10 @@ var stats: Stats                         # runtime Stats component
 @onready var abilities: UnitAbilities = $UnitAbilities
 
 # UI Components
-const HEALTH_BAR_SCENE = preload("res://Scenes/UI/UnitHealthBar.tscn")
-const DAMAGE_NUMBER_SCENE = preload("res://Scenes/UI/DamageNumber.tscn")
+# const HEALTH_BAR_SCENE = preload("res://Scenes/UI/UnitHealthBar.tscn")
+# const DAMAGE_NUMBER_SCENE = preload("res://Scenes/UI/DamageNumber.tscn")
+const HEALTH_BAR_SCENE = null
+const DAMAGE_NUMBER_SCENE = null
 var health_bar: Node3D = null
 
 
