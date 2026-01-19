@@ -1,0 +1,59 @@
+[gd_scene load_steps=9 format=3 uid="uid://dk5f204clt7ru"]
+
+[ext_resource type="Script" path="res://src/entities/player/HeroController.gd" id="1_hero"]
+[ext_resource type="Resource" path="res://src/items/definitions/weapon_bow.tres" id="2_stats"]
+[ext_resource type="Script" path="res://src/components/UnitCombat.gd" id="3_combat"]
+[ext_resource type="Script" path="res://src/components/UnitAbilities.gd" id="4_abilities"]
+[ext_resource type="Script" path="res://src/items/projectiles/DirectionalProjectile.gd" id="5_proj"]
+
+[sub_resource type="PackedScene" id="PackedScene_proj"]
+_bundled = {
+"conn_count": 0,
+"conns": PackedInt32Array(),
+"editable_instances": [],
+"names": PackedStringArray("Projectile", "Area3D", "monitorable", "script", "MeshInstance3D", "MeshInstance3D", "mesh", "CollisionShape3D", "CollisionShape3D", "shape"),
+"node_count": 3,
+"node_paths": [],
+"nodes": PackedInt32Array(-1, -1, 1, 0, -1, 2, 2, 0, 3, 1, 0, 0, 0, 5, 4, -1, 1, 6, 2, 0, 0, 0, 8, 7, -1, 1, 9, 3, 0),
+"variants": [false, ExtResource("5_proj"), SubResource("SphereMesh_proj"), SubResource("SphereShape3D_proj")],
+"version": 3
+}
+
+[sub_resource type="SphereMesh" id="SphereMesh_proj"]
+radius = 0.1
+height = 0.2
+
+[sub_resource type="SphereShape3D" id="SphereShape3D_proj"]
+radius = 0.1
+
+[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_hero"]
+
+[sub_resource type="CapsuleMesh" id="CapsuleMesh_hero"]
+
+[sub_resource type="SeparationRayShape3D" id="SeparationRayShape3D_cam"]
+
+[node name="PlayerHero" type="CharacterBody3D"]
+collision_layer = 2
+script = ExtResource("1_hero")
+stats_resource = ExtResource("2_stats")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+shape = SubResource("CapsuleShape3D_hero")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="."]
+mesh = SubResource("CapsuleMesh_hero")
+
+[node name="CameraBoom" type="SpringArm3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.5, 0)
+shape = SubResource("SeparationRayShape3D_cam")
+spring_length = 4.0
+
+[node name="Camera3D" type="Camera3D" parent="CameraBoom"]
+
+[node name="UnitCombat" type="Node" parent="."]
+script = ExtResource("3_combat")
+is_ranged = true
+projectile_scene = SubResource("PackedScene_proj")
+
+[node name="UnitAbilities" type="Node" parent="."]
+script = ExtResource("4_abilities")

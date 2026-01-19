@@ -11,7 +11,7 @@ config_version=5
 [application]
 
 config/name="test"
-run/main_scene="res://src/Scenes/Sandbox.tscn"
+run/main_scene="res://src/levels/Sandbox.tscn"
 config/features=PackedStringArray("4.5", "Forward Plus")
 config/icon="res://icon.svg"
 
@@ -26,9 +26,6 @@ enabled=PackedStringArray("res://addons/MarchingSquaresTerrain/plugin.cfg")
 [file_customization]
 
 folder_colors={
-"res://src/ResourceStats/": "yellow",
-"res://src/Scenes/": "green",
-"res://src/Scenes/Abilities/": "green",
 "res://src/Scripts/": "red"
 }
 
