@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="Artifact" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://src/shared/data/Artifact.gd" id="1_artifact"]
+[ext_resource type="Resource" path="res://src/features/artifacts/abilities/ability_blink.tres" id="2_ability"]
+
+[resource]
+script = ExtResource("1_artifact")
+name = "Blink Boots"
+description = "Boots that allow you to teleport short distances."
+granted_ability = ExtResource("2_ability")
+stat_modifiers = {
+"move_speed": 50.0
+}
+id = "blink_boots"
+gold_value = 500

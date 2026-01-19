@@ -21,12 +21,31 @@ func load_abilities_from_resources(ability_resources: Array):
 func equip_ability(slot: int, ability_resource: Ability):
 	if slot < 0 or slot >= 6:
 		return
+		
+	# Cleanup existing ability in this slot
+	remove_ability(slot)
+	
+	if ability_resource == null:
+		return
+
 	var instance = AbilityInstance.new(ability_resource, unit)
 	add_child(instance)
 	ability_slots[slot] = instance
 	
 	# Connect signal to relay
 	instance.ability_used.connect(func(aname): ability_cast.emit(slot))
+
+func remove_ability(slot: int):
+	if slot < 0 or slot >= 6:
+		return
+	
+	var existing = ability_slots[slot]
+	if existing:
+		# output a debug message? "Removing ability X"
+		existing.queue_free()
+		ability_slots[slot] = null
+	
+
 
 func _get_casting_manager():
 	var managers = get_tree().get_nodes_in_group("casting_manager")

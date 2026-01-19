@@ -1,0 +1,27 @@
+[gd_resource type="Resource" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://src/features/abilities/definitions/FireballAbility.gd" id="1_fireball"]
+
+[resource]
+script = ExtResource("1_fireball")
+ability_name = "Fireball"
+description = "Launch a fireball"
+suggested_hotkey = "W"
+cooldown = 1.0
+mana_cost = 10.0
+max_level = 1
+targeting_mode = 1
+cast_range = 10.0
+cast_radius = 1.0
+cast_point = 0.2
+requires_turn = true
+channel_duration = 0.0
+can_move_while_channeling = false
+can_cast_while_channeling = false
+effect_type = "DAMAGE"
+damage_type = "MAGICAL"
+base_amount = 50.0
+amount_per_level = 0.0
+scaling_factor = 0.0
+cc_duration = 0.0
+cc_value = 0.0

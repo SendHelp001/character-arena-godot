@@ -24,6 +24,7 @@ var stats: Stats                         # runtime Stats component
 @onready var selection: UnitSelection = $UnitSelection
 @onready var ui: UnitUI = $UnitUI
 @onready var abilities: UnitAbilities = $UnitAbilities
+@onready var inventory: UnitInventory = $UnitInventory
 
 # UI Components
 # const HEALTH_BAR_SCENE = preload("res://Scenes/UI/UnitHealthBar.tscn")
@@ -74,6 +75,26 @@ func _ready():
 		# Load abilities from stats resource
 		if stats_resource and stats_resource.abilities.size() > 0:
 			abilities.load_abilities_from_resources(stats_resource.abilities)
+
+	# Setup Inventory
+	if inventory:
+		inventory.setup(self, stats)
+		inventory.artifact_equipped.connect(_on_artifact_equipped)
+		inventory.artifact_unequipped.connect(_on_artifact_unequipped)
+
+# ------------------------------
+# Inventory Callbacks
+# ------------------------------
+func _on_artifact_equipped(slot: int, artifact: Artifact):
+	print("Unit %s equipped %s in slot %d" % [name, artifact.name, slot])
+	if abilities and artifact.granted_ability:
+		# Map inventory slot to ability slot directly for now
+		abilities.equip_ability(slot, artifact.granted_ability)
+
+func _on_artifact_unequipped(slot: int, artifact: Artifact):
+	print("Unit %s unequipped %s from slot %d" % [name, artifact.name, slot])
+	if abilities:
+		abilities.remove_ability(slot)
 
 # ------------------------------
 # Physics Process
