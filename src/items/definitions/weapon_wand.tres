@@ -1,7 +1,7 @@
 [gd_resource type="Resource" script_class="StatData" load_steps=5 format=3 uid="uid://m0dyb5fny5nl"]
 
 [ext_resource type="Resource" uid="uid://dg7bk5sb4n5lh" path="res://src/Resources/Abilities/Fireball.tres" id="1_0egoe"]
-[ext_resource type="Script" uid="uid://cua3yj1au11r0" path="res://src/Scripts/StatData.gd" id="1_mage"]
+[ext_resource type="Script" uid="uid://cua3yj1au11r0" path="res://src/shared/data/StatData.gd" id="1_mage"]
 [ext_resource type="Resource" uid="uid://dvkbgbf5j1g0j" path="res://src/Resources/Abilities/FrostNova.tres" id="2_o6kgb"]
 [ext_resource type="Resource" uid="uid://bjjtlrjj00mcr" path="res://src/Resources/Abilities/Blink.tres" id="3_l1doq"]
 

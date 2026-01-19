@@ -1,6 +1,6 @@
 [gd_resource type="Resource" script_class="FrostNovaAbility" load_steps=2 format=3 uid="uid://dvkbgbf5j1g0j"]
 
-[ext_resource type="Script" uid="uid://djavr3thuo8oi" path="res://src/Scripts/Abilities/FrostNovaAbility.gd" id="1"]
+[ext_resource type="Script" uid="uid://djavr3thuo8oi" path="res://src/features/abilities/definitions/FrostNovaAbility.gd" id="1"]
 
 [resource]
 script = ExtResource("1")

@@ -1,6 +1,6 @@
 [gd_resource type="Resource" script_class="SceneAbility" load_steps=3 format=3 uid="uid://1y0hygt0bg0d"]
 
-[ext_resource type="Script" uid="uid://dnoutsx2c7adh" path="res://src/Scripts/Abilities/SceneBased/SceneAbility.gd" id="1"]
+[ext_resource type="Script" uid="uid://dnoutsx2c7adh" path="res://src/features/abilities/definitions/SceneBased/SceneAbility.gd" id="1"]
 [ext_resource type="PackedScene" uid="uid://by4cl7ky4mjhq" path="res://src/Scenes/Abilities/Mage/Fireball.tscn" id="2"]
 
 [resource]
