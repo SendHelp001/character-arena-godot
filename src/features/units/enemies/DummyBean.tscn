@@ -1,0 +1,44 @@
+[gd_scene load_steps=9 format=3 uid="uid://dummy_bean_unit"]
+
+[ext_resource type="Script" path="res://src/features/units/Unit.gd" id="1_unit"]
+[ext_resource type="Resource" path="res://src/features/units/enemies/dummy_base.tres" id="2_stats"]
+[ext_resource type="Script" path="res://src/features/units/components/UnitCombat.gd" id="3_combat"]
+[ext_resource type="Script" path="res://src/features/units/components/UnitAbilities.gd" id="4_abilities"]
+
+[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_bean"]
+height = 1.5
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_bean"]
+albedo_color = Color(1, 0.2, 0.2, 1)
+
+[sub_resource type="CapsuleMesh" id="CapsuleMesh_bean"]
+material = SubResource("StandardMaterial3D_bean")
+height = 1.5
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_base"]
+top_radius = 0.6
+bottom_radius = 0.6
+height = 0.1
+
+[node name="DummyBean" type="CharacterBody3D"]
+collision_layer = 4
+script = ExtResource("1_unit")
+stats_resource = ExtResource("2_stats")
+team_id = 1
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.75, 0)
+shape = SubResource("CapsuleShape3D_bean")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.75, 0)
+mesh = SubResource("CapsuleMesh_bean")
+
+[node name="BasePlate" type="MeshInstance3D" parent="."]
+mesh = SubResource("CylinderMesh_base")
+
+[node name="UnitCombat" type="Node" parent="."]
+script = ExtResource("3_combat")
+
+[node name="UnitAbilities" type="Node" parent="."]
+script = ExtResource("4_abilities")

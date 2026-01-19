@@ -1,0 +1,18 @@
+[gd_resource type="Resource" script_class="StatData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://src/shared/data/StatData.gd" id="1_stats"]
+
+[resource]
+script = ExtResource("1_stats")
+name = "Dummy Bean"
+max_hp = 1000.0
+max_mana = 0.0
+mana_regen = 0.0
+move_speed = 0.0
+attack_damage = 0
+attack_range = 0.0
+attack_cooldown = 1.0
+attack_point = 0.3
+armor = 0.0
+abilities = []
+gold_worth = 10

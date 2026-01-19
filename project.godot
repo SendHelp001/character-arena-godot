@@ -11,13 +11,15 @@ config_version=5
 [application]
 
 config/name="test"
-run/main_scene="res://src/levels/Sandbox.tscn"
+run/main_scene="uid://etr3l7ds2b0t"
 config/features=PackedStringArray("4.5", "Forward Plus")
 config/icon="res://icon.svg"
 
+
+
 [autoload]
 
-GridManager="*res://Scripts/GridManager.gd"
+GridManager="*res://src/core/grid/GridManager.gd"
 
 [editor_plugins]
 
