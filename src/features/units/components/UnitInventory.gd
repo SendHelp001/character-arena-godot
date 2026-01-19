@@ -13,10 +13,10 @@ const MAX_SLOTS = 4
 @export var artifacts: Array[Artifact] = []
 
 # Dependencies
-var unit: Unit
+var unit: Node
 var stats: Stats
 
-func setup(p_unit: Unit, p_stats: Stats):
+func setup(p_unit: Node, p_stats: Stats):
 	unit = p_unit
 	stats = p_stats
 	

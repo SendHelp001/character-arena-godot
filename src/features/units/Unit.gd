@@ -12,19 +12,17 @@ var stats: Stats                         # runtime Stats component
 # ------------------------------
 # Node references
 # ------------------------------
-@onready var ring := $SelectionRing
-@onready var stats_label := $StatsLabel
-
-
-
 # Component references
 # ------------------------------
-@onready var movement = $UnitMovement
-@onready var combat: UnitCombat = $UnitCombat
-@onready var selection: UnitSelection = $UnitSelection
-@onready var ui: UnitUI = $UnitUI
-@onready var abilities: UnitAbilities = $UnitAbilities
-@onready var inventory: UnitInventory = $UnitInventory
+var movement: Node
+var combat: UnitCombat
+var selection: UnitSelection
+var ui: UnitUI
+var abilities: UnitAbilities
+var inventory: UnitInventory
+
+var ring: Node3D
+var stats_label: Node3D
 
 # UI Components
 # const HEALTH_BAR_SCENE = preload("res://Scenes/UI/UnitHealthBar.tscn")
@@ -39,6 +37,16 @@ var health_bar: Node3D = null
 # ------------------------------
 func _ready():
 	add_to_group("unit")
+	
+	# Resolve components safely
+	ring = get_node_or_null("SelectionRing")
+	stats_label = get_node_or_null("StatsLabel")
+	movement = get_node_or_null("UnitMovement")
+	combat = get_node_or_null("UnitCombat")
+	selection = get_node_or_null("UnitSelection")
+	ui = get_node_or_null("UnitUI")
+	abilities = get_node_or_null("UnitAbilities")
+	inventory = get_node_or_null("UnitInventory")
 	
 	# Initialize Stats component
 	stats = Stats.new()
@@ -172,21 +180,21 @@ func take_damage(amount):
 # ------------------------------
 func _create_health_bar():
 	"""Create and position health bar above unit"""
-	if HEALTH_BAR_SCENE:
-		health_bar = HEALTH_BAR_SCENE.instantiate()
-		add_child(health_bar)
-		health_bar.position = Vector3(0, 2.5, 0)  # Above head
-		
-		if stats:
-			health_bar.setup(self)
+	#if HEALTH_BAR_SCENE:
+	#	health_bar = HEALTH_BAR_SCENE.instantiate()
+	#	add_child(health_bar)
+	#	health_bar.position = Vector3(0, 2.5, 0)  # Above head
+	#	
+	#	if stats:
+	#		health_bar.setup(self)
 
 func _on_damage_taken(amount: float, damage_type: String):
 	"""Spawn damage number popup"""
-	if DAMAGE_NUMBER_SCENE:
-		var damage_num = DAMAGE_NUMBER_SCENE.instantiate()
-		get_tree().current_scene.add_child(damage_num)
-		damage_num.global_position = global_position + Vector3(0, 2, 0)
-		damage_num.setup(amount, damage_type)
+	#if DAMAGE_NUMBER_SCENE:
+	#	var damage_num = DAMAGE_NUMBER_SCENE.instantiate()
+	#	get_tree().current_scene.add_child(damage_num)
+	#	damage_num.global_position = global_position + Vector3(0, 2, 0)
+	#	damage_num.setup(amount, damage_type)
 
 # ------------------------------
 # Public API - Stats & Abilities

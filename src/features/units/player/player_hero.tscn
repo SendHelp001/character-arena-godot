@@ -1,17 +1,17 @@
 [gd_scene load_steps=10 format=3 uid="uid://b60w6u4ywuitj"]
 
-[ext_resource type="Script" path="res://src/features/units/player/HeroController.gd" id="1_hero"]
+[ext_resource type="Script" uid="uid://d1grhy5j6u1sk" path="res://src/features/units/player/HeroController.gd" id="1_hero"]
 [ext_resource type="Resource" path="res://src/features/units/player/hero_base.tres" id="2_stats"]
-[ext_resource type="Script" path="res://src/features/units/components/UnitCombat.gd" id="3_combat"]
+[ext_resource type="Script" uid="uid://qmvpsehqlu16" path="res://src/features/units/components/UnitCombat.gd" id="3_combat"]
 [ext_resource type="PackedScene" path="res://src/features/combat/projectiles/Projectile.tscn" id="4_proj"]
-[ext_resource type="Script" path="res://src/features/units/components/UnitAbilities.gd" id="5_abilities"]
-[ext_resource type="Script" path="res://src/features/units/components/UnitInventory.gd" id="6_inventory"]
+[ext_resource type="Script" uid="uid://b4od0xn7aejg2" path="res://src/features/units/components/UnitAbilities.gd" id="5_abilities"]
+[ext_resource type="Script" uid="uid://c4b0q54m208vj" path="res://src/features/units/components/UnitInventory.gd" id="6_inventory"]
+
+[sub_resource type="SeparationRayShape3D" id="SeparationRayShape3D_cam"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_fltv4"]
 
 [sub_resource type="CapsuleMesh" id="CapsuleMesh_pvfj0"]
-
-[sub_resource type="SeparationRayShape3D" id="SeparationRayShape3D_cam"]
 
 [node name="PlayerHero" type="CharacterBody3D"]
 collision_layer = 2
@@ -21,11 +21,12 @@ stats_resource = ExtResource("2_stats")
 [node name="VisualContainer" type="Node3D" parent="."]
 
 [node name="CameraBoom" type="SpringArm3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.5, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.0805749, 1.5, 0.2663592)
 shape = SubResource("SeparationRayShape3D_cam")
 spring_length = 4.0
 
 [node name="Camera3D" type="Camera3D" parent="CameraBoom"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.8, 0, 0)
 
 [node name="Collision" type="CollisionShape3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)

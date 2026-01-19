@@ -1,0 +1,16 @@
+[gd_scene load_steps=3 format=3 uid="uid://circle_indicator_visual"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_circle"]
+transparency = 1
+albedo_color = Color(0, 0.7, 1, 0.3)
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_circle"]
+material = SubResource("StandardMaterial3D_circle")
+top_radius = 1.0
+bottom_radius = 1.0
+height = 0.1
+
+[node name="CircleIndicator" type="Node3D"]
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="."]
+mesh = SubResource("CylinderMesh_circle")

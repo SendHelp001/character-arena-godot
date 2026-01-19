@@ -20,9 +20,9 @@ var targeting_type: TargetingType = TargetingType.NONE
 var indicator_node: Node3D = null
 
 # Indicator scenes
-const CIRCLE_INDICATOR = preload("res://Scenes/AbilityCasting/CircleIndicator.tscn")
-const ARROW_INDICATOR = preload("res://Scenes/AbilityCasting/ArrowIndicator.tscn")
-const POINT_INDICATOR = preload("res://Scenes/AbilityCasting/PointIndicator.tscn")
+const CIRCLE_INDICATOR = preload("res://src/features/abilities/casting/visuals/CircleIndicator.tscn")
+const ARROW_INDICATOR = preload("res://src/features/abilities/casting/visuals/ArrowIndicator.tscn")
+const POINT_INDICATOR = preload("res://src/features/abilities/casting/visuals/PointIndicator.tscn")
 
 signal cast_confirmed(target_position: Vector3)
 signal cast_cancelled()

@@ -20,7 +20,7 @@ var caster: Node = null             # Reference to the unit casting
 var casting_bar: Control = null     # UI element for casting/channeling
 
 # Casting bar scene
-const CASTING_BAR_SCENE = preload("res://Scenes/UI/CastingBar.tscn")
+const CASTING_BAR_SCENE = preload("res://src/ui/components/CastingBar.tscn")
 
 # ------------------------------------------------------------------------------
 # Runtime State
@@ -335,4 +335,3 @@ func _should_interrupt_channel() -> bool:
 	# Future: Check death, silence, etc.
 	
 	return false
-

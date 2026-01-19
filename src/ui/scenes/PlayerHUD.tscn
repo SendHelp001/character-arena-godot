@@ -1,6 +1,7 @@
 [gd_scene load_steps=2 format=3]
 
 [ext_resource type="Script" path="res://src/ui/PlayerHUD.gd" id="1_hud"]
+[ext_resource type="PackedScene" uid="uid://inventory_ui_container" path="res://src/ui/components/InventoryUI.tscn" id="2_inventory"]
 
 [node name="PlayerHUD" type="Control"]
 layout_mode = 3
@@ -47,4 +48,21 @@ text = "Weapon: None"
 
 [node name="HealthLabel" type="Label" parent="MarginContainer/VBoxContainer"]
 layout_mode = 2
-text = "HP: 100 / 100"
+[node name="ActiveAbilityLabel" type="Label" parent="MarginContainer/VBoxContainer"]
+layout_mode = 2
+text = "Active: None"
+theme_override_colors/font_color = Color(1, 1, 0, 1)
+
+[node name="InventoryUI" parent="." instance=ExtResource("2_inventory")]
+layout_mode = 1
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -280.0
+offset_top = -80.0
+offset_right = -20.0
+offset_bottom = -20.0
+grow_horizontal = 0
+grow_vertical = 0

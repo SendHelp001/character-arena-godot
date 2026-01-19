@@ -1,10 +1,7 @@
 extends Unit
 class_name HeroController
 
-# Preload some weapons for demo purposes
-const WEAPON_WARRIOR = preload("res://src/items/definitions/weapon_greatsword.tres")
-const WEAPON_ARCHER = preload("res://src/items/definitions/weapon_bow.tres")
-const WEAPON_MAGE = preload("res://src/items/definitions/weapon_wand.tres")
+
 
 @export_group("Movement")
 @export var speed := 10.0
@@ -48,9 +45,14 @@ func _ready():
 			if stats:
 				hud_instance.update_health(stats.current_hp, stats_resource.max_hp)
 
+
 		# Connect Health Update
 		if stats:
-			stats.health_changed.connect(_on_health_changed)
+			stats.hp_changed.connect(_on_health_changed)
+			
+		# Setup Inventory UI
+		if inventory:
+			hud_instance.setup_inventory(inventory)
 			
 	# Initialize speed from stats
 	if stats_resource:
@@ -70,13 +72,13 @@ func _unhandled_input(event):
 	if Input.get_mouse_mode() != Input.MOUSE_MODE_CAPTURED:
 		return
 
-	# Weapon Swap Demo
-	if event.is_action_pressed("ability_1"): # Map 1 to Greatsword
-		equip_weapon(WEAPON_WARRIOR)
-	if event.is_action_pressed("ability_2"): # Map 2 to Bow
-		equip_weapon(WEAPON_ARCHER)
-	if event.is_action_pressed("ability_3"): # Map 3 to Wand
-		equip_weapon(WEAPON_MAGE)
+
+
+	# Input for Slot Selection (1-4)
+	if event is InputEventKey and event.pressed and not event.echo:
+		if event.keycode >= KEY_1 and event.keycode <= KEY_4:
+			var slot_idx = event.keycode - KEY_1
+			_select_inventory_slot(slot_idx)
 
 	if event is InputEventMouseMotion:
 		# Rotate Character around Y axis (Left/Right) - Aiming direction
@@ -86,6 +88,29 @@ func _unhandled_input(event):
 		if camera_boom:
 			camera_boom.rotate_x(-event.relative.y * mouse_sensitivity)
 			camera_boom.rotation.x = clamp(camera_boom.rotation.x, deg_to_rad(min_pitch), deg_to_rad(max_pitch))
+
+var active_slot_index: int = 0
+
+func _select_inventory_slot(index: int):
+	active_slot_index = index
+	if hud_instance:
+		hud_instance.select_inventory_slot(index)
+		hud_instance.update_active_ability_label(_get_ability_name_at(index))
+
+func _get_ability_name_at(index: int) -> String:
+	if inventory:
+		var artifact = inventory.get_artifact(index)
+		if artifact and artifact.granted_ability:
+			# Get ability name from resource
+			# Note: granted_ability is PackedScene or Ability resource? 
+			# In Artifact.gd it's typed as Resource (implicitly) or Ability
+			# If it's a resource, it has 'ability_name'
+			if "ability_name" in artifact.granted_ability:
+				return artifact.granted_ability.ability_name
+			return artifact.name
+	return "None"
+
+	return "None"
 
 func _physics_process(delta):
 	# Handle Gravity
@@ -117,45 +142,43 @@ func _physics_process(delta):
 	_handle_combat_inputs()
 
 func _handle_combat_inputs():
+	# Check if Casting
+	var casting_mgr = get_tree().get_first_node_in_group("casting_manager")
+	if casting_mgr and casting_mgr.is_casting:
+		return
+
+	# Left Click: Basic Attack
 	if Input.is_action_pressed("fire"):
 		if combat:
-			# Get Aim Direction from Camera
-			var aim_dir = -camera_boom.global_transform.basis.z
+			# Aim using Raycast for accuracy
 			var origin = global_position + Vector3(0, 1.5, 0) # Approx shoulder/head height
+			var aim_target = _get_camera_aim_point()
+			var aim_dir = (aim_target - origin).normalized()
+			
 			combat.execute_manual_attack(origin, aim_dir)
+			
+	# Right Click: Cast Active Ability
+	if Input.is_action_pressed("alt_fire"):
+		if abilities:
+			abilities.try_cast_ability(active_slot_index)
+
+func _get_camera_aim_point() -> Vector3:
+	var viewport = get_viewport()
+	var center = viewport.get_visible_rect().size / 2.0
+	
+	var ray_len = 1000.0
+	var from = camera.project_ray_origin(center)
+	var to = from + camera.project_ray_normal(center) * ray_len
+	
+	var space = get_world_3d().direct_space_state
+	var query = PhysicsRayQueryParameters3D.create(from, to)
+	query.exclude = [self] # Don't hit self
+	query.collision_mask = 1 | 4 # Hit environment (1) and enemies (4) (adjust layers as needed)
+	
+	var result = space.intersect_ray(query)
+	if result:
+		return result.position
+	else:
+		return to
 	
 	# Abilities handled via input map inside generic ability component or here
-
-# ------------------------------
-# Weapon System
-# ------------------------------
-func equip_weapon(new_weapon_data: StatData):
-	if not new_weapon_data: return
-	
-	print("Swapping weapon to: ", new_weapon_data.name)
-	
-	# Update Stats
-	stats_resource = new_weapon_data
-	if stats:
-		stats.stat_data = new_weapon_data
-		# Update Health? Maybe keep current percentage?
-		# For now, full reset for simplicity or just max_hp update
-		stats.emit_signal("max_hp_changed", new_weapon_data.max_hp)
-		
-	# Update Speed
-	speed = new_weapon_data.move_speed
-	
-	if hud_instance:
-		hud_instance.update_weapon_info(new_weapon_data.name)
-		if stats:
-			hud_instance.update_health(stats.current_hp, new_weapon_data.max_hp)
-		
-	# Update Abilities
-	if abilities:
-		abilities.load_abilities_from_resources(new_weapon_data.abilities)
-		
-	# Update Combat Logic (Ranged vs Melee)
-	if combat:
-		# Heuristic: If range > 4, it's ranged
-		combat.is_ranged = new_weapon_data.attack_range > 4.0
-		# Update generic stats on combat if needed (combat pulls from stats component mostly)

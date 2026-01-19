@@ -15,15 +15,9 @@ run/main_scene="uid://etr3l7ds2b0t"
 config/features=PackedStringArray("4.5", "Forward Plus")
 config/icon="res://icon.svg"
 
-
-
 [autoload]
 
 GridManager="*res://src/core/grid/GridManager.gd"
-
-[editor_plugins]
-
-enabled=PackedStringArray("res://addons/MarchingSquaresTerrain/plugin.cfg")
 
 [file_customization]
 

@@ -1,4 +1,5 @@
 extends Resource
+# Force Re-import
 class_name StatData
 
 # Allow editing in the inspector

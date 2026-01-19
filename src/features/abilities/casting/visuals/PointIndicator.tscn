@@ -1,0 +1,15 @@
+[gd_scene load_steps=3 format=3 uid="uid://point_indicator_visual"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_point"]
+transparency = 1
+albedo_color = Color(1, 0.5, 0, 0.5)
+
+[sub_resource type="SphereMesh" id="SphereMesh_point"]
+material = SubResource("StandardMaterial3D_point")
+radius = 0.2
+height = 0.4
+
+[node name="PointIndicator" type="Node3D"]
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="."]
+mesh = SubResource("SphereMesh_point")

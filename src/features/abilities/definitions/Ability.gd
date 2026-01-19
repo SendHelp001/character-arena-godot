@@ -2,7 +2,7 @@ extends Resource
 class_name Ability
 
 # Import TargetingType enum
-const CastingMode = preload("res://Scripts/AbilityCasting/CastingMode.gd")
+const CastingMode = preload("res://src/features/abilities/casting/CastingMode.gd")
 
 # ------------------------------------------------------------------------------
 # LIFECYCLE EVENT SIGNALS (Dota 2 Pattern: OnSpellStart, OnChannelFinish, etc.)

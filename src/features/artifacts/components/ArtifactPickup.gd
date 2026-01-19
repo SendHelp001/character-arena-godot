@@ -8,7 +8,7 @@ func _ready():
 	body_entered.connect(_on_body_entered)
 	
 	# Rotate for visual effect
-	var tween = create_tween().set_loop()
+	var tween = create_tween().set_loops()
 	tween.tween_property(self, "rotation:y", deg_to_rad(360), 2.0).as_relative()
 
 func setup(p_artifact: Artifact):
