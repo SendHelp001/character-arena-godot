@@ -26,10 +26,8 @@ func _execute_blink(caster: Node, target_pos: Vector3, level: int):
 	# Keep Y position (same height)
 	target_pos.y = caster_pos.y
 	
-	# Grid Validation (Avoid Walls)
-	if GridManager:
-		target_pos = GridManager.get_closest_walkable_point(target_pos)
-		
+
+
 	# HEIGHT CORRECTION: Raycast down to find ground
 	var space_state = caster.get_world_3d().direct_space_state
 	var ray_origin = target_pos + Vector3(0, 50.0, 0) # Start high

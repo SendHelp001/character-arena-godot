@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="StatData" load_steps=2 format=3 uid="uid://cqb5h8x2v3n4a"]
+
+[ext_resource type="Script" uid="uid://cua3yj1au11r0" path="res://Scripts/StatData.gd" id="1_archer"]
+
+[resource]
+script = ExtResource("1_archer")
+name = "Archer"
+max_hp = 420
+move_speed = 285.0
+attack_damage = 75
+attack_range = 8.0
+attack_cooldown = 1.5
+armor = 6.0
+mana = 200
+mana_regen = 2.0
+gold_worth = 120
+metadata/_custom_type_script = "uid://cua3yj1au11r0"

@@ -1,0 +1,36 @@
+[gd_scene load_steps=5 format=3 uid="uid://waterplugin001"]
+
+[ext_resource type="Shader" path="res://Scenes/Water/water.gdshader" id="1_shader"]
+
+[sub_resource type="FastNoiseLite" id="FastNoiseLite_wave"]
+noise_type = 3
+frequency = 0.02
+fractal_type = 2
+
+[sub_resource type="NoiseTexture2D" id="NoiseTexture2D_wave"]
+seamless = true
+noise = SubResource("FastNoiseLite_wave")
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_water"]
+render_priority = 0
+shader = ExtResource("1_shader")
+shader_parameter/albedo = Color(0, 0.466667, 0.741176, 1)
+shader_parameter/albedo_deep = Color(0, 0.160784, 0.431373, 1)
+shader_parameter/beer_factor = 0.5
+shader_parameter/roughness = 0.1
+shader_parameter/wave_speed = 0.05
+shader_parameter/wave_scale = 0.5
+shader_parameter/wave_height = 0.2
+shader_parameter/foam_color = Color(1, 1, 1, 1)
+shader_parameter/foam_amount = 0.5
+shader_parameter/wave_noise = SubResource("NoiseTexture2D_wave")
+
+[sub_resource type="PlaneMesh" id="PlaneMesh_water"]
+size = Vector2(100, 100)
+subdivide_width = 50
+subdivide_depth = 50
+
+[node name="StylizedWater" type="MeshInstance3D"]
+mesh = SubResource("PlaneMesh_water")
+material_override = SubResource("ShaderMaterial_water")
+cast_shadow = 0

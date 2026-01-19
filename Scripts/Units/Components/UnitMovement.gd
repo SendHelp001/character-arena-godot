@@ -246,14 +246,11 @@ func _calculate_context_velocity(target_pos: Vector3, top_speed: float) -> Vecto
 func _update_path(target_pos: Vector3):
 	# USE CUSTOM GRID MANAGER
 	# This replaces Godot's NavigationServer with our custom A* Grid
-	if GridManager:
-		current_path = GridManager.get_path_points(unit.global_position, target_pos)
-		current_path_idx = 0
-		
-		# Debug print
-		# print("Path found: ", current_path.size(), " points")
-	else:
-		push_error("GridManager not found! Is it autoloaded?")
+	# USE NAVIGATION SERVER (Standard 3D Navigation)
+	# Falling back to standard navigation since GridManager has been deprecated.
+	var map = unit.get_world_3d().get_navigation_map()
+	current_path = NavigationServer3D.map_get_path(map, unit.global_position, target_pos, true)
+	current_path_idx = 0
 	
 	if current_path.is_empty():
 		stop_movement()

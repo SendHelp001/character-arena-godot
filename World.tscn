@@ -1,16 +1,16 @@
 [gd_scene load_steps=19 format=3 uid="uid://cfrhyxgrw488v"]
 
-[ext_resource type="Script" uid="uid://cjey2pgieryep" path="res://Scripts/cameraController.gd" id="1_c6gwx"]
+
 [ext_resource type="Script" uid="uid://1ssoj02b8pxp" path="res://Scripts/UISetup.gd" id="1_fv4w7"]
-[ext_resource type="Script" uid="uid://dm8w3c4c2u5d4" path="res://Scripts/selectionController.gd" id="2_2dftf"]
+
 [ext_resource type="Script" uid="uid://cio7gctac5qpo" path="res://Scripts/FPSLabel.gd" id="4_fps"]
 [ext_resource type="PackedScene" uid="uid://bwcncnyxg7pgj" path="res://Scenes/Units/Archer/Archer.tscn" id="4_wygdx"]
 [ext_resource type="PackedScene" uid="uid://ryf8eh1f7mvt" path="res://Scenes/Units/Mage/Mage.tscn" id="7_bah7m"]
-[ext_resource type="Script" uid="uid://cd6rq3pujxlyk" path="res://Scripts/SelectionBox.gd" id="7_selection_box"]
+
 [ext_resource type="PackedScene" uid="uid://csx2eoajop3km" path="res://Scenes/Units/Warrior/Warrior.tscn" id="7_wygdx"]
 [ext_resource type="PackedScene" uid="uid://b172h8rtydne6" path="res://Scenes/UI/PlayerUI.tscn" id="9_fvag4"]
 [ext_resource type="Script" uid="uid://bxod6n47w0hu5" path="res://Scripts/AbilityCasting/CastingManager.gd" id="10_casting_mgr"]
-[ext_resource type="Script" uid="uid://cjroopsonw4ay" path="res://Scripts/GridRegion.gd" id="11_kva58"]
+
 [ext_resource type="PackedScene" uid="uid://b8q7x4y201w3" path="res://Scenes/Environment/Wall.tscn" id="12_f5c0m"]
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_bcbcq"]
@@ -43,20 +43,12 @@ environment = SubResource("Environment_eu7l1")
 [node name="MeshInstance3D" type="MeshInstance3D" parent="."]
 mesh = SubResource("PlaneMesh_cmany")
 
-[node name="Camera3D" type="Camera3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 0.64278764, 0.76604444, 0, -0.76604444, 0.64278764, 0, 6.6992855, 0)
-fov = 90.0
-script = ExtResource("1_c6gwx")
-zoom_speed = 2.0
-min_height = 7.0
-max_height = 25.0
+
 
 [node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 0.54902285, 0.8358074, 0, -0.8358074, 0.54902285, 0, 7.298506, 0)
 
-[node name="SelectionController" type="Node3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 0.73035306, 0.6830698, 0, -0.6830698, 0.73035306, 0, 3.393238, 0)
-script = ExtResource("2_2dftf")
+
 
 [node name="CanvasLayer" type="CanvasLayer" parent="."]
 
@@ -66,15 +58,7 @@ offset_bottom = 23.0
 text = "FPS: 60"
 script = ExtResource("4_fps")
 
-[node name="SelectionBox" type="Control" parent="CanvasLayer"]
-layout_mode = 3
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-mouse_filter = 2
-script = ExtResource("7_selection_box")
+
 
 [node name="Warrior" parent="." instance=ExtResource("7_wygdx")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.090961576, 1.0398037, -6.468279)
@@ -98,9 +82,7 @@ physics_material_override = SubResource("PhysicsMaterial_2dftf")
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.04624176, 0, 0.083639145)
 shape = SubResource("BoxShape3D_bcbcq")
 
-[node name="NAVMESH" type="Node3D" parent="."]
-script = ExtResource("11_kva58")
-map_size = Vector3(100, 1, 100)
+
 
 [node name="Wall" parent="." instance=ExtResource("12_f5c0m")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5.435469, 0.5, -3.081028)

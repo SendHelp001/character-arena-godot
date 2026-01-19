@@ -99,6 +99,28 @@ func cancel_windup():
 		# For now, just silently stop it.
 
 # ------------------------------
+# Manual API (For Hero Controller)
+# ------------------------------
+func execute_manual_attack(origin_pos: Vector3, direction: Vector3):
+	"""
+	Called by HeroController to fire immediately in a direction.
+	Bypasses the auto-target windup loop.
+	"""
+	if attack_timer > 0:
+		return # Cooldown active
+		
+	if not stats or not stats.stat_data:
+		return
+
+	# Apply Cooldown
+	attack_timer = stats.stat_data.attack_cooldown
+	
+	if is_ranged:
+		_spawn_manual_projectile(origin_pos, direction)
+	else:
+		_perform_manual_melee(origin_pos, direction)
+
+# ------------------------------
 # Combat Processing
 # ------------------------------
 func process_combat(delta: float):
@@ -228,6 +250,39 @@ func _spawn_projectile():
 	if projectile.has_method("setup"):
 		var damage_amount = stats.stat_data.attack_damage if stats else 10
 		projectile.setup(unit, damage_amount, stats.stat_data.attack_range if stats else 10.0, 20.0, target)
+
+func _spawn_manual_projectile(origin_pos: Vector3, direction: Vector3):
+	if not projectile_scene:
+		push_warning("Ranged unit has no projectile scene assigned!")
+		return
+		
+	var projectile = projectile_scene.instantiate()
+	unit.get_tree().current_scene.add_child(projectile)
+	
+	# Spawn at camera/origin height (usually passed from camera)
+	projectile.global_position = origin_pos
+	
+	# Look in direction
+	# We want the projectile to fly along 'direction'.
+	# We can use look_at if we have a point, or set basis manually.
+	var target_point = origin_pos + (direction * 50.0)
+	projectile.look_at(target_point, Vector3.UP)
+	
+	if projectile.has_method("setup_directional"):
+		var damage_amount = stats.stat_data.attack_damage if stats else 10
+		var range_val = stats.stat_data.attack_range if stats else 20.0
+		projectile.setup_directional(unit, damage_amount, range_val, 40.0, direction)
+	elif projectile.has_method("setup"):
+		# Fallback for old projectiles
+		var damage_amount = stats.stat_data.attack_damage if stats else 10
+		projectile.setup(unit, damage_amount, stats.stat_data.attack_range if stats else 10.0, 40.0, null)
+
+func _perform_manual_melee(origin_pos: Vector3, direction: Vector3):
+	# Simple hitbox check in front
+	# This requires a proper hitbox system, for now we can do a shape cast or simplified raycast
+	print("Manual Melee Attack performed towards: ", direction)
+	# TODO: Implement Sector/Shape Cast for melee
+
 
 
 # ------------------------------

@@ -1,62 +1,43 @@
 extends Area3D
 class_name DirectionalProjectile
 
-var speed: float = 20.0
-var damage: float = 0.0
-var max_range: float = 0.0
-var distance_traveled: float = 0.0
-var caster: Node = null
+@export var speed: float = 20.0
+@export var life_time: float = 3.0
 
-func setup(caster_unit: Node, dmg: float, range_val: float, speed_val: float = 20.0, _target: Node = null):
-	caster = caster_unit
+var owner_unit: Node
+var damage: int = 10
+var direction: Vector3 = Vector3.FORWARD
+var traveled_time: float = 0.0
+
+func setup_directional(caster_unit: Node, dmg: int, _range_val: float, speed_val: float, dir: Vector3):
+	owner_unit = caster_unit
 	damage = dmg
-	max_range = range_val
 	speed = speed_val
-
-	# Safe Connection for area_entered
-	if not area_entered.is_connected(_on_area_entered):
-		area_entered.connect(_on_area_entered)
-	# Safe Connection for body_entered
-	if not body_entered.is_connected(_on_body_entered):
-		body_entered.connect(_on_body_entered)
+	direction = dir.normalized()
+	
+	# Connect overlap
+	body_entered.connect(_on_body_entered)
 
 func _physics_process(delta):
-	var move_amount = speed * delta
-	position -= transform.basis.z * move_amount
-	distance_traveled += move_amount
+	global_position += direction * speed * delta
 	
-	if distance_traveled >= max_range:
+	traveled_time += delta
+	if traveled_time >= life_time:
 		queue_free()
-
-func _on_area_entered(area):
-	# Handle HitboxComponent interaction
-	if area is HitboxComponent or area.has_method("take_damage"):
-		_try_damage(area)
 
 func _on_body_entered(body):
-	if body == caster:
+	if body == owner_unit:
 		return
-	# Handle Wall/Terrain
-	if body is StaticBody3D or body is CSGShape3D:
-		queue_free()
-	# Fallback for Units without Hitboxes (if any)
-	elif body.has_method("take_damage"):
-		_try_damage(body)
-
-func _try_damage(target):
-	if target == caster: return
-	
-	# Check teams if possible
-	var target_team = -1
-	var caster_team = -1
-	
-	if target.has_method("get_team_id"): target_team = target.get_team_id()
-	if caster and caster.has_method("get_team_id"): caster_team = caster.get_team_id()
-	
-	if target_team != -1 and caster_team != -1 and target_team == caster_team:
-		return # Ally hit
 		
-	if target.has_method("take_damage"):
-		target.take_damage(damage)
-		print("🔥 Projectile hit %s for %d damage" % [target.name, damage])
+	# Check if hit something damageable
+	if body.has_method("take_damage"):
+		# Ensure we don't friendly fire if same team
+		if owner_unit.has_method("get_team_id") and body.has_method("get_team_id"):
+			if owner_unit.get_team_id() == body.get_team_id():
+				return # Ignore friendly
+				
+		body.take_damage(damage)
+		queue_free()
+	elif body is StaticBody3D or body is CSGShape3D:
+		# Hit wall/obstacles
 		queue_free()
