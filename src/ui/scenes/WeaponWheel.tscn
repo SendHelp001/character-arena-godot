@@ -1,0 +1,70 @@
+[gd_scene load_steps=4 format=3 uid="uid://weapon_wheel_ui"]
+
+[ext_resource type="Script" path="res://src/ui/scenes/WeaponWheel.gd" id="1_script"]
+[ext_resource type="Texture2D" uid="uid://indicator_circle_tex" path="res://src/features/abilities/casting/assets/IndicatorCircle.tres" id="2_tex"]
+
+[node name="WeaponWheel" type="Control"]
+layout_mode = 3
+anchors_preset = 4
+anchor_top = 0.5
+anchor_bottom = 0.5
+offset_left = 50.0
+offset_right = 50.0
+grow_vertical = 2
+script = ExtResource("1_script")
+
+[node name="PrimaryCircle" type="TextureRect" parent="."]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -32.0
+offset_top = -32.0
+offset_right = 32.0
+offset_bottom = 32.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("2_tex")
+expand_mode = 1
+
+[node name="Label" type="Label" parent="PrimaryCircle"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+text = "GUN"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="SecondaryCircle" type="TextureRect" parent="."]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = 18.0
+offset_top = 18.0
+offset_right = 58.0
+offset_bottom = 58.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("2_tex")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Label" type="Label" parent="SecondaryCircle"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_font_sizes/font_size = 10
+text = "SWORD"
+horizontal_alignment = 1
+vertical_alignment = 1
