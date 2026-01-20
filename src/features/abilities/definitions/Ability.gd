@@ -82,8 +82,16 @@ func calculate_value(caster: Node, level: int) -> float:
 
 func can_cast(caster: Node, level: int) -> bool:
 	"""Check if ability can be cast (mana, cooldown, etc.)"""
-	if not caster.has_method("get_stats"): return false
+	if not caster.has_method("get_stats"): 
+		print("❌ Ability.can_cast failed: Caster has no get_stats method")
+		return false
 	var stats = caster.get_stats()
-	if not stats: return false
-	if stats.current_mana < mana_cost: return false
+	if not stats: 
+		print("❌ Ability.can_cast failed: Stats component is null")
+		return false
+	
+	if stats.current_mana < mana_cost: 
+		print("❌ Ability.can_cast failed: Not enough mana (%d < %d)" % [stats.current_mana, mana_cost])
+		return false
+		
 	return true

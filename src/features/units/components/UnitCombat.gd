@@ -7,19 +7,7 @@ class_name UnitCombat
 signal target_acquired(target: Node)
 signal attack_windup_started(target: Node)
 signal attack_executed(target: Node)
-signal combat_mode_changed(is_aggressive: bool)
-
-# ------------------------------
-# Auto-targeting settings
-# ------------------------------
-@export var auto_target_range := 15.0
-@export var auto_target_interval := 0.5
-
-# ------------------------------
-# Combat Mode
-# ------------------------------
-enum CombatMode { PASSIVE, AGGRESSIVE }
-var combat_mode: CombatMode = CombatMode.PASSIVE
+# signal combat_mode_changed(is_aggressive: bool) # Removing aggression mode for Brawler
 
 # ------------------------------
 # References
@@ -29,7 +17,7 @@ var stats  # Stats type
 var movement  # UnitMovement type
 
 # ------------------------------
-# Ranged Unit Settings
+# Ranged Settings
 # ------------------------------
 @export var is_ranged: bool = false
 @export var projectile_scene: PackedScene
@@ -40,8 +28,7 @@ var movement  # UnitMovement type
 # ------------------------------
 var target: Node = null
 var attack_timer := 0.0
-var auto_target_timer := 0.0
-var windup_timer := 0.0  # Time remaining in windup
+var windup_timer := 0.0
 
 # ------------------------------
 # Initialization
@@ -50,20 +37,6 @@ func setup(p_unit, p_stats, p_movement):
 	unit = p_unit
 	stats = p_stats
 	movement = p_movement
-
-# ------------------------------
-# Combat Mode Management
-# ------------------------------
-func set_aggressive_mode(aggressive: bool):
-	var new_mode = CombatMode.AGGRESSIVE if aggressive else CombatMode.PASSIVE
-	if combat_mode != new_mode:
-		combat_mode = new_mode
-		combat_mode_changed.emit(aggressive)
-		if not aggressive:
-			clear_target()
-
-func is_aggressive() -> bool:
-	return combat_mode == CombatMode.AGGRESSIVE
 
 # ------------------------------
 # Target Management
@@ -75,8 +48,6 @@ func set_target(new_target: Node):
 		
 	target = new_target
 	if new_target:
-		# Setting a target puts unit in aggressive mode
-		set_aggressive_mode(true)
 		target_acquired.emit(new_target)
 
 func get_current_target() -> Node:
@@ -87,9 +58,8 @@ func clear_target():
 	target = null
 
 func stop_all_actions():
-	"""Stop all combat actions and return to passive mode"""
+	"""Stop all combat actions"""
 	cancel_windup()
-	set_aggressive_mode(false)
 	clear_target()
 
 func cancel_windup():
@@ -120,6 +90,62 @@ func execute_manual_attack(origin_pos: Vector3, direction: Vector3):
 	else:
 		_perform_manual_melee(origin_pos, direction)
 
+func execute_manual_melee_box(origin_pos: Vector3, direction: Vector3, box_size: Vector3):
+	"""Manual melee attack with defined box size"""
+	if attack_timer > 0:
+		return
+		
+	if not stats or not stats.stat_data:
+		return
+		
+	# Apply Cooldown
+	attack_timer = stats.stat_data.attack_cooldown
+	
+	# Perform Box Cast
+	# Calculate center of the box: slightly in front of the unit
+	var center = origin_pos + (direction * (box_size.z / 2.0))
+	
+	# Create query parameter
+	var space_state = unit.get_world_3d().direct_space_state
+	var shape = BoxShape3D.new()
+	shape.size = box_size
+	
+	var query = PhysicsShapeQueryParameters3D.new()
+	query.shape = shape
+	
+	# Transform: Positioned at 'center', looking in 'direction'
+	var xform = Transform3D()
+	xform.origin = center
+	
+	# Orient box to face direction
+	# Basis should be constructed from direction. 
+	# Safest is to use look_at on a temp node logic or basis.looking_at
+	if direction.length_squared() > 0.001:
+		xform.basis = Basis.looking_at(direction, Vector3.UP)
+	
+	query.transform = xform
+	query.collision_mask = 1 | 4 # Terrain(1) isn't needed for damage, but good to know. Enemy(4).
+	query.exclude = [unit] # Don't hit self
+	
+	var results = space_state.intersect_shape(query)
+	var hit_something = false
+	
+	for result in results:
+		var collider = result.collider
+		if collider and is_instance_valid(collider):
+			if collider.has_method("take_damage"):
+				# Friendly Fire check
+				if collider.has_method("get_team_id") and unit.has_method("get_team_id"):
+					if collider.get_team_id() == unit.get_team_id():
+						continue
+				
+				collider.take_damage(stats.stat_data.attack_damage)
+				hit_something = true
+				
+	if hit_something:
+		print("⚔️ Sword hit!")
+		# Optional: Play sound/effect
+
 # ------------------------------
 # Combat Processing
 # ------------------------------
@@ -133,28 +159,10 @@ func process_combat(delta: float):
 	if windup_timer > 0:
 		windup_timer -= delta
 		
-		# Check if target is still valid/alive during windup
-		if not target or not is_instance_valid(target) or (target.has_method("get_stats") and target.get_stats().current_hp <= 0):
-			cancel_windup()
-			return
-			
-		# Check if we moved? UnitMovement usually handles moving unit, 
-		# so if velocity > 0 maybe cancel? 
-		# But UnitMovement.stop_movement() should be called when we start attack.
-		# If user manually moves, Unit.gd calls set_move_target -> movement.set_target_position
-		# which doesn't directly call us, but Unit.set_move_target calls combat.set_aggressive_mode(false)
-		# which calls clear_target -> cancel_windup. So that path is covered.
-		
 		if windup_timer <= 0:
 			_execute_attack()
 			
-		return # Don't look for new attacks while winding up
-
-	_process_attack()
-	
-	# Only auto-target if in aggressive mode
-	if combat_mode == CombatMode.AGGRESSIVE:
-		_find_auto_target(delta)
+		return
 
 func _process_attack():
 	if not target or not is_instance_valid(target):
@@ -286,30 +294,6 @@ func _perform_manual_melee(origin_pos: Vector3, direction: Vector3):
 
 
 # ------------------------------
-# Auto-Targeting AI
+# Auto-Targeting AI (Removed for Brawler/Action style)
 # ------------------------------
-func _find_auto_target(delta: float):
-	auto_target_timer -= delta
-	if auto_target_timer > 0:
-		return
-	auto_target_timer = auto_target_interval
-	
-	# Keep current target if valid and near enough
-	if target and is_instance_valid(target):
-		if target.has_method("get_team_id") and target.get_team_id() != unit.team_id:
-			var dist = unit.global_position.distance_to(target.global_position)
-			if dist <= stats.stat_data.attack_range * 1.5:  # buffer
-				return
-	
-	# Find nearest enemy
-	var nearest = null
-	var min_dist = auto_target_range
-	for enemy in unit.get_tree().get_nodes_in_group("unit"):
-		if enemy.has_method("get_team_id") and enemy.get_team_id() != unit.team_id and enemy != unit and is_instance_valid(enemy):
-			var d = unit.global_position.distance_to(enemy.global_position)
-			if d < min_dist:
-				min_dist = d
-				nearest = enemy
-	
-	if nearest != target:
-		set_target(nearest)
+# func _find_auto_target(delta: float): ...

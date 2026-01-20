@@ -1,0 +1,8 @@
+[gd_scene format=3 uid="uid://decal_indicator_scene"]
+
+[node name="DecalIndicator" type="Node3D"]
+
+[node name="Decal" type="Decal" parent="."]
+size = Vector3(2, 5, 2)
+texture_albedo = null
+cull_mask = 1048573

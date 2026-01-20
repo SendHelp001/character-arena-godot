@@ -1,27 +1,19 @@
-[gd_resource type="Resource" load_steps=2 format=3]
+[gd_resource type="Resource" script_class="BlinkAbility" load_steps=2 format=3 uid="uid://dsntnlbk654t2"]
 
-[ext_resource type="Script" path="res://src/features/abilities/definitions/BlinkAbility.gd" id="1_blink"]
+[ext_resource type="Script" uid="uid://ds8wjxyhc6cki" path="res://src/features/abilities/definitions/BlinkAbility.gd" id="1_blink"]
 
 [resource]
 script = ExtResource("1_blink")
 ability_name = "Blink"
 description = "Teleport short distance"
-suggested_hotkey = "Q"
 cooldown = 2.0
-mana_cost = 20.0
+mana_cost = 0.0
 max_level = 1
 targeting_mode = 3
 cast_range = 8.0
-cast_radius = 0.0
 cast_point = 0.1
-requires_turn = true
-channel_duration = 0.0
-can_move_while_channeling = false
-can_cast_while_channeling = false
+can_move_while_channeling = true
+can_cast_while_channeling = true
 effect_type = "BUFF"
-damage_type = "MAGICAL"
 base_amount = 0.0
 amount_per_level = 0.0
-scaling_factor = 0.0
-cc_duration = 0.0
-cc_value = 0.0

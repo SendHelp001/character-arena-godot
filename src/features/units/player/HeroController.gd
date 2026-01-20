@@ -6,7 +6,7 @@ class_name HeroController
 @export_group("Movement")
 @export var speed := 10.0
 @export var sprint_speed := 18.0
-@export var jump_velocity := 12.0
+@export var jump_velocity := 12.0 # Increased from 12.0 for higher force against high gravity
 @export var acceleration := 60.0
 @export var friction := 50.0
 @export var air_control := 0.3
@@ -22,7 +22,15 @@ class_name HeroController
 var hud_scene = preload("res://src/ui/scenes/PlayerHUD.tscn")
 var hud_instance = null
 
-var gravity = ProjectSettings.get_setting("physics/3d/default_gravity")
+enum WeaponMode { GUN, SWORD }
+var current_weapon: WeaponMode = WeaponMode.GUN
+var sword_hitbox_size: Vector3 = Vector3(2.0, 2.0, 3.0)
+
+# Placeholder Visuals (Created in code for now)
+var gun_mesh: MeshInstance3D
+var sword_mesh: MeshInstance3D
+
+var gravity = ProjectSettings.get_setting("physics/3d/default_gravity") * 3.0 # Tripled gravity for snappy feel
 
 func _ready():
 	super._ready() # Initialize Stats, UI, etc.
@@ -34,25 +42,35 @@ func _ready():
 	# Capture mouse
 	Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
 
+	_create_weapon_visuals()
+
 	# Setup HUD
 	if hud_scene:
 		hud_instance = hud_scene.instantiate()
 		add_child(hud_instance)
-		
-		# Initial Update
-		if stats_resource:
-			hud_instance.update_weapon_info(stats_resource.name)
-			if stats:
-				hud_instance.update_health(stats.current_hp, stats_resource.max_hp)
 
-
-		# Connect Health Update
+	# Initial Update
+	if hud_instance:
+		hud_instance.update_weapon_info("Gun") # Always init to Gun
+	
+	if stats_resource:
 		if stats:
-			stats.hp_changed.connect(_on_health_changed)
+			hud_instance.update_health(stats.current_hp, stats_resource.max_hp)
 			
-		# Setup Inventory UI
-		if inventory:
-			hud_instance.setup_inventory(inventory)
+	_update_weapon_visuals()
+
+	# Connect Health Update
+	if stats:
+		stats.hp_changed.connect(_on_health_changed)
+		# DEBUG: Force Mana for testing
+		stats.current_mana = 100
+		print("🧪 DEBUG: Forced Mana to 100")
+		
+	print("🧪 DEBUG: Gravity: %s. Fall Gravity will be: %s" % [gravity, gravity * 2.0])
+		
+	# Setup Inventory UI
+	if inventory:
+		hud_instance.setup_inventory(inventory)
 			
 	# Initialize speed from stats
 	if stats_resource:
@@ -79,6 +97,11 @@ func _unhandled_input(event):
 		if event.keycode >= KEY_1 and event.keycode <= KEY_4:
 			var slot_idx = event.keycode - KEY_1
 			_select_inventory_slot(slot_idx)
+			
+		# Weapon Swap (TAB)
+		if event.keycode == KEY_TAB:
+			_swap_weapon()
+
 
 	if event is InputEventMouseMotion:
 		# Rotate Character around Y axis (Left/Right) - Aiming direction
@@ -115,7 +138,12 @@ func _get_ability_name_at(index: int) -> String:
 func _physics_process(delta):
 	# Handle Gravity
 	if not is_on_floor():
-		velocity.y -= gravity * delta
+		var applied_gravity = gravity
+		# If falling, apply extra gravity for snappiness
+		if velocity.y < 0:
+			applied_gravity *= 2.0 # Fall 2x faster than rise
+		
+		velocity.y -= applied_gravity * delta
 
 	# Handle Jump
 	if Input.is_action_just_pressed("jump") and is_on_floor():
@@ -138,29 +166,60 @@ func _physics_process(delta):
 
 	move_and_slide()
 	
+	# Update Stats/Combat Timers
+	if combat:
+		combat.process_combat(delta)
+	
 	# Forward combat inputs
 	_handle_combat_inputs()
 
 func _handle_combat_inputs():
-	# Check if Casting
+	# Check if Casting (Targeting Mode)
 	var casting_mgr = get_tree().get_first_node_in_group("casting_manager")
 	if casting_mgr and casting_mgr.is_casting:
 		return
 
-	# Left Click: Basic Attack
+	# Check if Casting (Ability Windup/Channel) - Prevents cancelling ability with attack
+	if abilities and abilities.is_any_ability_casting():
+		return
+
+	# Left Click: Attack (Gun or Sword)
 	if Input.is_action_pressed("fire"):
 		if combat:
-			# Aim using Raycast for accuracy
-			var origin = global_position + Vector3(0, 1.5, 0) # Approx shoulder/head height
+			var origin = global_position + Vector3(0, 1.5, 0) # Head height
 			var aim_target = _get_camera_aim_point()
 			var aim_dir = (aim_target - origin).normalized()
 			
-			combat.execute_manual_attack(origin, aim_dir)
+			if current_weapon == WeaponMode.GUN:
+				# Continuous Gun Fire
+				combat.execute_manual_attack(origin, aim_dir)
+				
+			elif current_weapon == WeaponMode.SWORD:
+				# Melee Attack
+				# For sword, we might want "Just Pressed" to avoid rapid fire spam if holding?
+				# But "continuous" request might imply auto-swing. 
+				# Let's start with is_action_pressed for continuous swing if cooldown allows.
+				combat.execute_manual_melee_box(origin, aim_dir, sword_hitbox_size)
 			
 	# Right Click: Cast Active Ability
-	if Input.is_action_pressed("alt_fire"):
+	if Input.is_action_just_pressed("alt_fire"): # Changed to Just Pressed strictly for toggle/cast
+		print("Right Click (alt_fire) detected!")
 		if abilities:
 			abilities.try_cast_ability(active_slot_index)
+
+func _swap_weapon():
+	if current_weapon == WeaponMode.GUN:
+		current_weapon = WeaponMode.SWORD
+		print("⚔️ Swapped to SWORD")
+		if hud_instance:
+			hud_instance.update_weapon_info("Sword")
+	else:
+		current_weapon = WeaponMode.GUN
+		print("🔫 Swapped to GUN")
+		if hud_instance:
+			hud_instance.update_weapon_info("Gun")
+	
+	_update_weapon_visuals()
 
 func _get_camera_aim_point() -> Vector3:
 	var viewport = get_viewport()
@@ -182,3 +241,38 @@ func _get_camera_aim_point() -> Vector3:
 		return to
 	
 	# Abilities handled via input map inside generic ability component or here
+
+func _create_weapon_visuals():
+	# Gun: Box
+	gun_mesh = MeshInstance3D.new()
+	var gun_box = BoxMesh.new()
+	gun_box.size = Vector3(0.1, 0.1, 0.5)
+	gun_mesh.mesh = gun_box
+	var gun_mat = StandardMaterial3D.new()
+	gun_mat.albedo_color = Color.CYAN
+	gun_mesh.material_override = gun_mat
+	
+	# Sword: Prerism/Flat box
+	sword_mesh = MeshInstance3D.new()
+	var sword_box = BoxMesh.new()
+	sword_box.size = Vector3(0.1, 0.5, 0.1) # Vertical blade look? Or forward
+	sword_box.size = Vector3(0.1, 0.05, 1.2) # Long blade forward
+	sword_mesh.mesh = sword_box
+	var sword_mat = StandardMaterial3D.new()
+	sword_mat.albedo_color = Color.ORANGE
+	sword_mesh.material_override = sword_mat
+	
+	# Attach to Character Root (TPS/Brawler style)
+	# Ideally attach to a BoneAttachment3D if using a skeleton.
+	# For now, just offset from root.
+	add_child(gun_mesh)
+	add_child(sword_mesh)
+	
+	# Offset positions (Right hand side of character)
+	# Assuming character faces -Z, Right is +X
+	gun_mesh.position = Vector3(0.6, 1.0, -0.5)
+	sword_mesh.position = Vector3(0.6, 1.0, -0.5)
+		
+func _update_weapon_visuals():
+	if gun_mesh: gun_mesh.visible = (current_weapon == WeaponMode.GUN)
+	if sword_mesh: sword_mesh.visible = (current_weapon == WeaponMode.SWORD)

@@ -1,7 +1,7 @@
-[gd_resource type="Resource" script_class="Artifact" load_steps=3 format=3]
+[gd_resource type="Resource" script_class="Artifact" load_steps=3 format=3 uid="uid://ctnh1u3yklop8"]
 
-[ext_resource type="Script" path="res://src/shared/data/Artifact.gd" id="1_artifact"]
-[ext_resource type="Resource" path="res://src/features/artifacts/abilities/ability_blink.tres" id="2_ability"]
+[ext_resource type="Script" uid="uid://bismeuo3lw0gc" path="res://src/shared/data/Artifact.gd" id="1_artifact"]
+[ext_resource type="Resource" uid="uid://dsntnlbk654t2" path="res://src/features/artifacts/abilities/ability_blink.tres" id="2_ability"]
 
 [resource]
 script = ExtResource("1_artifact")

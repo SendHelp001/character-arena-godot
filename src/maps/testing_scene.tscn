@@ -1,9 +1,9 @@
 [gd_scene load_steps=9 format=3 uid="uid://etr3l7ds2b0t"]
 
 [ext_resource type="PackedScene" uid="uid://b60w6u4ywuitj" path="res://src/features/units/player/player_hero.tscn" id="1_player"]
-[ext_resource type="PackedScene" path="res://src/features/units/enemies/DummyBean.tscn" id="2_dummy"]
+[ext_resource type="PackedScene" uid="uid://pigfxvick71d" path="res://src/features/units/enemies/DummyBean.tscn" id="2_dummy"]
 [ext_resource type="PackedScene" path="res://src/features/artifacts/components/ArtifactPickup.tscn" id="3_pickup"]
-[ext_resource type="Resource" path="res://src/features/artifacts/artifact_blink_boots.tres" id="4_blink"]
+[ext_resource type="Resource" uid="uid://ctnh1u3yklop8" path="res://src/features/artifacts/artifact_blink_boots.tres" id="4_blink"]
 [ext_resource type="Resource" path="res://src/features/artifacts/artifact_fire_wand.tres" id="5_fire"]
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_test"]

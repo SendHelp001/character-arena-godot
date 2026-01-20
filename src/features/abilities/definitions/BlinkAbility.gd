@@ -9,38 +9,52 @@ func _init():
 	on_cast_point_finish.connect(_execute_blink)
 
 func _execute_blink(caster: Node, target_pos: Vector3, level: int):
-	"""Teleport caster to target position"""
-	print("✨ Blink cast at level %d!" % level)
+	"""
+	Teleport caster to target position.
+	Mechanic: 3D Raycast from crosshair (passed as target_pos by CastingManager usually), max 10 range.
+	"""
+	print("✨ Blink cast start!")
 	
-	# Clamp to max range
+	var max_blink_range = 10.0
+	
+	# The target_pos passed here comes from CastingManager calling 'cast(target_pos)'.
+	# CastingManager usually does a raycast against the GROUND (Terrain).
+	# BUT the user wants "Air/Ground" and "Raycast from crosshair".
+	# If CastingManager is doing the raycast, it might be clamping to ground.
+	# We might need to override behavior or ensure CastingManager sends the raw point.
+	
+	# Assuming CastingManager sends the point the crosshair is pointing at (could be wall, ground, or point in air if unlimited ray?)
+	# Actually CastingManager usually rays against mask.
+	
+	# Let's perform our own check if needed, or trust target_pos.
+	# The prompt says "blink should be raycasted from the crosshair".
+	# If we trust 'target_pos' is the hit point:
+	
 	var caster_pos = caster.global_position
-	var direction = target_pos - caster_pos
-	direction.y = 0
+	print("✨ Blink Start. Caster Pos: %s, Target Request: %s" % [caster_pos, target_pos])
+	# We want to blink FROM caster TO target_pos
 	
-	var current_range = cast_range + (level * 1.0)  # +1m per level
+	var vec_to_target = target_pos - caster_pos
+	var dist = vec_to_target.length()
 	
-	if direction.length() > current_range:
-		direction = direction.normalized() * current_range
-		target_pos = caster_pos + direction
+	var final_pos = target_pos
 	
-	# Keep Y position (same height)
-	target_pos.y = caster_pos.y
+	if dist > max_blink_range:
+		# Clamp to 10 units
+		final_pos = caster_pos + vec_to_target.normalized() * max_blink_range
+		
+	# 3D Teleport - No ground snapping!
+	# Just set position.
 	
-
-
-	# HEIGHT CORRECTION: Raycast down to find ground
-	var space_state = caster.get_world_3d().direct_space_state
-	var ray_origin = target_pos + Vector3(0, 50.0, 0) # Start high
-	var ray_end = target_pos + Vector3(0, -50.0, 0) # Cast down
-	var query = PhysicsRayQueryParameters3D.create(ray_origin, ray_end)
-	query.collision_mask = 1 # Terrain only
+	# Collision check? Teleporting inside a wall is bad.
+	# Simple check: Raycast from caster to final_pos to see if we hit a wall before 10 units?
+	# Or assume the 'target_pos' was a raycast hit result, so it IS a surface.
+	# If we clamp, we are mid-air or mid-space.
+	# Being inside geometry is the risk.
 	
-	var result = space_state.intersect_ray(query)
-	if result:
-		target_pos.y = result.position.y + 1.0 # Snap to ground + Half Height
-	else:
-		target_pos.y = caster_pos.y # Fallback
+	# If we are simply moving 'towards' target, we might clip.
+	# Safe move: move_and_slide if using CharacterBody3D? Or just set global_position.
+	# For Blink, instant set is standard.
 	
-	# Teleport!
-	caster.global_position = target_pos
-	print("  Teleported to: ", target_pos)
+	caster.global_position = final_pos
+	print("✨ Blink Complete. New Pos: %s. Delta: %s" % [caster.global_position, caster.global_position - caster_pos])

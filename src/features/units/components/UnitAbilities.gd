@@ -6,8 +6,6 @@ var unit: Node = null
 
 signal ability_cast(slot_index: int)
 
-const HOTKEYS = [KEY_Q, KEY_W, KEY_E, KEY_R, KEY_D, KEY_F]
-
 func setup(owner_unit: Node):
 	unit = owner_unit
 	for i in range(6):
@@ -41,32 +39,33 @@ func remove_ability(slot: int):
 	
 	var existing = ability_slots[slot]
 	if existing:
-		# output a debug message? "Removing ability X"
 		existing.queue_free()
-		ability_slots[slot] = null
-	
-
+# Removed const preload to avoid cyclic dependency parser errors
+# const CASTING_MANAGER_SCRIPT = preload(...)
 
 func _get_casting_manager():
 	var managers = get_tree().get_nodes_in_group("casting_manager")
 	if managers.size() > 0:
 		return managers[0]
+	
+	# Fallback: Auto-spawn
+	print("⚠️ No CastingManager found in scene. Auto-spawning one...")
+	var manager_script = load("res://src/features/abilities/casting/CastingManager.gd")
+	if manager_script:
+		var new_manager = manager_script.new()
+		new_manager.name = "CastingManager"
+		get_tree().root.add_child(new_manager)
+		
+		# Ensure it's in the group
+		if not new_manager.is_in_group("casting_manager"):
+			new_manager.add_to_group("casting_manager")
+			
+		return new_manager
+	
+	print("❌ Failed to load CastingManager script!")
 	return null
 
-func _input(event):
-	if not unit or not unit.is_selected():
-		return
-	
-	var casting_mgr = _get_casting_manager()
-	if casting_mgr and casting_mgr.is_casting:
-		return
-	
-	if event is InputEventKey and event.pressed and not event.echo:
-		for i in range(HOTKEYS.size()):
-			if event.keycode == HOTKEYS[i]:
-				try_cast_ability(i)
-				get_viewport().set_input_as_handled()
-				break
+# Input handling removed. HeroController should call try_cast_ability(slot) directly.
 
 func try_cast_ability(slot: int):
 	if slot < 0 or slot >= 6:
@@ -79,9 +78,19 @@ func try_cast_ability(slot: int):
 	
 	var casting_mgr = _get_casting_manager()
 	if casting_mgr:
+		print("✅ UnitAbilities: CastingManager found. Requesting cast...")
 		casting_mgr.start_casting(ability_instance, unit)
+	else:
+		print("❌ UnitAbilities: CastingManager NOT FOUND in group 'casting_manager'")
 
 func get_ability(slot: int) -> AbilityInstance:
 	if slot >= 0 and slot < 6:
 		return ability_slots[slot]
 	return null
+
+func is_any_ability_casting() -> bool:
+	"""Check if any ability is currently in cast point or channeling"""
+	for slot in ability_slots:
+		if slot and slot.is_casting():
+			return true
+	return false

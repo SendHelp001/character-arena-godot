@@ -27,10 +27,9 @@ var stats_label: Node3D
 # UI Components
 # const HEALTH_BAR_SCENE = preload("res://Scenes/UI/UnitHealthBar.tscn")
 # const DAMAGE_NUMBER_SCENE = preload("res://Scenes/UI/DamageNumber.tscn")
-const HEALTH_BAR_SCENE = null
-const DAMAGE_NUMBER_SCENE = null
+const HEALTH_BAR_SCENE = preload("res://src/ui/components/UnitHealthBar.tscn")
+const DAMAGE_NUMBER_SCENE = preload("res://src/ui/components/DamageNumber.tscn")
 var health_bar: Node3D = null
-
 
 # ------------------------------
 # Initialization
@@ -124,16 +123,14 @@ func set_move_target(pos: Vector3):
 	if movement:
 		movement.set_target_position(pos)
 	# Moving switches to passive mode (stops auto-attacking)
-	if combat:
-		combat.set_aggressive_mode(false)
+	# combat.set_aggressive_mode(false) Removed in Brawler Refactor
 
 func set_follow_target(target_unit: Node):
 	"""Command this unit to follow another unit"""
 	if movement:
 		movement.set_follow_target(target_unit)
 	# Following switches to passive mode
-	if combat:
-		combat.set_aggressive_mode(false)
+	# combat.set_aggressive_mode(false) Removed in Brawler Refactor
 
 func stop_all_actions():
 	"""Stop all movement and combat actions"""
@@ -180,21 +177,25 @@ func take_damage(amount):
 # ------------------------------
 func _create_health_bar():
 	"""Create and position health bar above unit"""
-	#if HEALTH_BAR_SCENE:
-	#	health_bar = HEALTH_BAR_SCENE.instantiate()
-	#	add_child(health_bar)
-	#	health_bar.position = Vector3(0, 2.5, 0)  # Above head
-	#	
-	#	if stats:
-	#		health_bar.setup(self)
+	# Don't show health bar for player (team 0)
+	if team_id == 0:
+		return
+
+	if HEALTH_BAR_SCENE:
+		health_bar = HEALTH_BAR_SCENE.instantiate()
+		add_child(health_bar)
+		health_bar.position = Vector3(0, 2.5, 0)  # Above head
+		
+		if stats:
+			health_bar.setup(self)
 
 func _on_damage_taken(amount: float, damage_type: String):
 	"""Spawn damage number popup"""
-	#if DAMAGE_NUMBER_SCENE:
-	#	var damage_num = DAMAGE_NUMBER_SCENE.instantiate()
-	#	get_tree().current_scene.add_child(damage_num)
-	#	damage_num.global_position = global_position + Vector3(0, 2, 0)
-	#	damage_num.setup(amount, damage_type)
+	if DAMAGE_NUMBER_SCENE:
+		var damage_num = DAMAGE_NUMBER_SCENE.instantiate()
+		get_tree().current_scene.add_child(damage_num)
+		damage_num.global_position = global_position + Vector3(0, 2, 0)
+		damage_num.setup(amount, damage_type)
 
 # ------------------------------
 # Public API - Stats & Abilities

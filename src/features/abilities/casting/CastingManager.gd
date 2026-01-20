@@ -20,10 +20,9 @@ var targeting_type: TargetingType = TargetingType.NONE
 var indicator: Node3D = null
 var range_indicator: Node3D = null
 
-const DECAL_INDICATOR = preload("res://Scenes/AbilityCasting/DecalIndicator.tscn")
-const TEX_CIRCLE = preload("res://Resources/Textures/IndicatorCircle.tres")
-const TEX_ARROW = preload("res://Resources/Textures/IndicatorArrow.tres")
-const TEX_RING = preload("res://Resources/Textures/IndicatorRing.tres")
+const DECAL_SCENE_PATH = "res://src/features/abilities/casting/DecalIndicator.tscn"
+const TEX_CIRCLE_PATH = "res://src/features/abilities/casting/assets/IndicatorCircle.tres"
+# const TEX_ARROW_PATH = ... (Not made yet, fallback to Circle or Code)
 
 const TERRAIN_MASK = 1 # Layer 1 for Terrain/Ground
 
@@ -36,7 +35,9 @@ func _ready():
 	add_to_group("casting_manager")
 
 func start_casting(ability_inst: AbilityInstance, casting_unit: Node):
+	print("📥 CastingManager: start_casting requested for ", ability_inst.ability.ability_name if ability_inst and ability_inst.ability else "Unknown")
 	if not ability_inst or not ability_inst.ability:
+		print("❌ CastingManager: Aborting - Invalid Ability")
 		return
 	
 	is_casting = true
@@ -56,70 +57,39 @@ func _create_indicators():
 	indicator = null
 	range_indicator = null
 	
-	# CHECK: Is this a Scene-Based Ability (via Adapter)?
-	if current_ability is SceneAbility and current_ability.ability_scene:
-		var scene_instance = current_ability.ability_scene.instantiate()
+	var decal_scene = load(DECAL_SCENE_PATH)
+	if not decal_scene:
+		print("❌ CastingManager: Decal Scene not found at ", DECAL_SCENE_PATH)
+		return
 		
-		# Try to find the VisualIndicator child
-		var visual_node = scene_instance.get_node_or_null("VisualIndicator")
-		if visual_node:
-			# We found the indicator!
-			# Detach it from the scene instance so we can use it, 
-			# or just use the whole scene instance as the indicator container.
-			
-			# Let's use the whole scene instance, but we need to be careful about its other children.
-			# For WYSIWYG, the scene IS the indicator representation.
-			
-			get_tree().root.add_child(scene_instance)
-			indicator = scene_instance # Keep reference to delete later
-			
-			# If the scene root is AbilityRoot, it might have stats we want to respect?
-			# The SceneAbility resource should ideally mirror them, or we trust the scene.
-			# For casting, we just need the visual.
-			
-			# Position it
-			indicator.global_position = caster.global_position
-			
-			# We don't need to manually set texture/size because the Scene already has it configured!
-			# That's the beauty of the Visual Editor.
-			return # Done, we have our indicator
-			
-		scene_instance.queue_free() # Failed to find indicator
-	
-	# Standard Resource-Based Logic (Fallback)
-	
-	# Standard Resource-Based Logic (Keep this for backward compatibility)
+	var circle_tex = load(TEX_CIRCLE_PATH)
 	
 	# 1. Create Range Indicator (Ring Decal)
 	if current_ability.cast_range > 0:
-		range_indicator = DECAL_INDICATOR.instantiate()
+		range_indicator = decal_scene.instantiate()
 		get_tree().root.add_child(range_indicator)
-		range_indicator.set_texture(TEX_RING)
+		_setup_decal(range_indicator, circle_tex, Vector3(current_ability.cast_range * 2.0, 10.0, current_ability.cast_range * 2.0))
 		range_indicator.global_position = caster.global_position
-		var size = current_ability.cast_range * 2.0
-		range_indicator.set_size(Vector3(size, 10.0, size))
-	
+
 	# 2. Create Targeting Indicator (Decal)
 	match targeting_type:
-		TargetingType.CIRCULAR:
-			indicator = DECAL_INDICATOR.instantiate()
+		TargetingType.CIRCULAR, TargetingType.POINT:
+			indicator = decal_scene.instantiate()
 			get_tree().root.add_child(indicator)
-			indicator.set_texture(TEX_CIRCLE)
-			var size = current_ability.cast_radius * 2.0
-			indicator.set_size(Vector3(size, 10.0, size))
+			var size = current_ability.cast_radius * 2.0 if targeting_type == TargetingType.CIRCULAR else 2.0
+			_setup_decal(indicator, circle_tex, Vector3(size, 10.0, size))
 			
 		TargetingType.DIRECTIONAL:
-			indicator = DECAL_INDICATOR.instantiate()
+			indicator = decal_scene.instantiate()
 			get_tree().root.add_child(indicator)
-			indicator.set_texture(TEX_ARROW)
-			indicator.global_position = caster.global_position
-			indicator.set_size(Vector3(2.0, 10.0, current_ability.cast_range))
+			# Fallback to circle if no arrow tex
+			_setup_decal(indicator, circle_tex, Vector3(2.0, 10.0, current_ability.cast_range))
 			
-		TargetingType.POINT:
-			indicator = DECAL_INDICATOR.instantiate()
-			get_tree().root.add_child(indicator)
-			indicator.set_texture(TEX_CIRCLE)
-			indicator.set_size(Vector3(2.0, 10.0, 2.0))
+func _setup_decal(node: Node3D, texture: Texture2D, size: Vector3):
+	var decal = node.get_node_or_null("Decal")
+	if decal:
+		decal.texture_albedo = texture
+		decal.size = size
 
 func _input(event):
 	if not is_casting:
@@ -153,6 +123,10 @@ func _process(_delta):
 	if not camera: return
 	
 	var mouse_pos = viewport.get_mouse_position()
+	# IF Mouse is captured, use screen center
+	if Input.get_mouse_mode() == Input.MOUSE_MODE_CAPTURED:
+		mouse_pos = viewport.get_visible_rect().size / 2.0
+	
 	var origin = camera.project_ray_origin(mouse_pos)
 	var direction = camera.project_ray_normal(mouse_pos)
 	
@@ -162,10 +136,19 @@ func _process(_delta):
 	ray.to = origin + direction * 1000
 	ray.collision_mask = TERRAIN_MASK # Only hit ground
 	
-	var result = space_state.intersect_ray(ray)
-	if not result: return
+	# Exclude caster so we don't hit ourselves inside the collision shape (especially when jumping/falling)
+	if caster is CollisionObject3D:
+		ray.exclude = [caster.get_rid()]
 	
-	var mouse_world_pos = result.position
+	var result = space_state.intersect_ray(ray)
+	
+	var mouse_world_pos
+	if result:
+		mouse_world_pos = result.position
+	else:
+		# Hit nothing (Air) - Project far
+		mouse_world_pos = origin + direction * 1000.0
+	
 	var caster_pos = caster.global_position
 	
 	# Update Targeting Indicator
@@ -175,7 +158,11 @@ func _process(_delta):
 			
 			indicator.global_position = caster_pos
 			var look_target = mouse_world_pos
-			look_target.y = caster_pos.y
+			# For directional, we might want 3D or 2D? Usually ground 2D.
+			# If user wants 3D directional (shooting up), we need to look_at in 3D.
+			# But DirectionalProjectile usually moves flat or logic handles pitch.
+			# Let's keep it flat Y for consistency unless specified.
+			look_target.y = caster_pos.y 
 			indicator.look_at(look_target, Vector3.UP)
 			
 			# Offset the decal forward by half its length so it starts at caster
@@ -185,13 +172,15 @@ func _process(_delta):
 		else:
 			# Circular/Point: Follows mouse, clamped to range
 			var target_pos = mouse_world_pos
+			
+			# For 3D Blink (Ground/Air), we normally want to clamp DISTANCE from caster.
 			var to_target = target_pos - caster_pos
-			to_target.y = 0
+			# to_target.y = 0 # DISABLED Y-flattening for 3D air targeting
 			
 			if to_target.length() > current_ability.cast_range:
 				to_target = to_target.normalized() * current_ability.cast_range
 				target_pos = caster_pos + to_target
-				target_pos.y = mouse_world_pos.y
+				# target_pos.y = mouse_world_pos.y # Already 3D
 			
 			indicator.global_position = target_pos
 
@@ -201,27 +190,29 @@ func _confirm_cast():
 	
 	var target_pos = Vector3.ZERO
 	
+	
+	
 	if targeting_type == TargetingType.DIRECTIONAL:
 		if indicator:
 			# Re-calculate target based on look direction
-			# Since we translated the indicator, we need to be careful.
-			# Best to just use caster pos + direction to mouse
+			# For 3D Aim, we should regenerate the Ray from Center if captured
 			var mouse_pos = get_viewport().get_mouse_position()
+			if Input.get_mouse_mode() == Input.MOUSE_MODE_CAPTURED:
+				mouse_pos = get_viewport().get_visible_rect().size / 2.0
+				
 			var camera = get_viewport().get_camera_3d()
 			var origin = camera.project_ray_origin(mouse_pos)
 			var direction = camera.project_ray_normal(mouse_pos)
-			var space_state = get_tree().root.get_world_3d().direct_space_state
-			var ray = PhysicsRayQueryParameters3D.new()
-			ray.from = origin
-			ray.to = origin + direction * 1000
-			ray.collision_mask = TERRAIN_MASK
-			var result = space_state.intersect_ray(ray)
 			
-			if result:
-				var look_dir = (result.position - caster.global_position).normalized()
-				look_dir.y = 0
-				target_pos = caster.global_position + look_dir * current_ability.cast_range
+			# Dumb directional: Just origin + direction * range ?
+			# For DirectionalProjectile setup, we usually pass 'direction'.
+			# But here we return a target_pos.
+			# Let's ensure we return a point on the ray.
+			target_pos = origin + direction * current_ability.cast_range
+			
+			# (If we relied on 'result' previously, we were floor-clamping)
 	else:
+		# Point / Circular
 		target_pos = indicator.global_position if indicator else caster.global_position
 	
 	if current_ability_instance:

@@ -44,4 +44,3 @@ func _update_slot_at(index: int):
 	if index >= 0 and index < slots.size():
 		var artifact = inventory_ref.get_artifact(index)
 		slots[index].update_slot(artifact)
-
