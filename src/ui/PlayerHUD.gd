@@ -40,6 +40,26 @@ func update_active_ability_label(ability_name: String):
 	if active_ability_label:
 		active_ability_label.text = "Active: " + ability_name
 
+# Debug UI
+var debug_visible: bool = false
+var debug_label: Label = null
+
+func toggle_debug():
+	debug_visible = !debug_visible
+	if debug_label:
+		debug_label.visible = debug_visible
+
+func update_debug_info(velocity: float, angle: float):
+	if not debug_visible: return
+	
+	if not debug_label:
+		debug_label = Label.new()
+		debug_label.name = "DebugLabel"
+		debug_label.position = Vector2(10, 200)
+		add_child(debug_label)
+		
+	debug_label.text = "Vel: %.1f\nCam Angle: %.1f" % [velocity, angle]
+
 func setup_inventory(inventory: UnitInventory):
 	if inventory_ui:
 		inventory_ui.setup(inventory)

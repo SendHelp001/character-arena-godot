@@ -1,0 +1,20 @@
+[gd_resource type="Resource" script_class="RaceData" load_steps=4 format=3 uid="uid://ddm7pf44s6fcr"]
+
+[ext_resource type="Script" uid="uid://ctuvvabv3n0ac" path="res://src/features/races/RaceData.gd" id="1_ydx4k"]
+[ext_resource type="Script" uid="uid://tsa7ly41281p" path="res://src/shared/data/StatData.gd" id="2_stat"]
+
+[sub_resource type="Resource" id="Resource_stats"]
+script = ExtResource("2_stat")
+name = "Aerian Base"
+max_hp = 80.0
+move_speed = 10.0
+
+[resource]
+script = ExtResource("1_ydx4k")
+id = "aerian"
+display_name = "Aerian"
+description = "The Light-Footed. Lower HP, can glide, and high air control."
+base_stats_template = SubResource("Resource_stats")
+air_control = 0.8
+gravity_multiplier = 0.8
+can_glide = true

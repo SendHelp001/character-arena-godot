@@ -1,11 +1,13 @@
-[gd_scene load_steps=10 format=3 uid="uid://b60w6u4ywuitj"]
+[gd_scene load_steps=12 format=3 uid="uid://b60w6u4ywuitj"]
 
 [ext_resource type="Script" uid="uid://d1grhy5j6u1sk" path="res://src/features/units/player/HeroController.gd" id="1_hero"]
 [ext_resource type="Resource" path="res://src/features/units/player/hero_base.tres" id="2_stats"]
+[ext_resource type="Resource" uid="uid://ddm7pf44s6fcr" path="res://src/features/races/definitions/Aerians.tres" id="2_yr85l"]
 [ext_resource type="Script" uid="uid://qmvpsehqlu16" path="res://src/features/units/components/UnitCombat.gd" id="3_combat"]
 [ext_resource type="PackedScene" path="res://src/features/combat/projectiles/Projectile.tscn" id="4_proj"]
 [ext_resource type="Script" uid="uid://b4od0xn7aejg2" path="res://src/features/units/components/UnitAbilities.gd" id="5_abilities"]
 [ext_resource type="Script" uid="uid://c4b0q54m208vj" path="res://src/features/units/components/UnitInventory.gd" id="6_inventory"]
+[ext_resource type="Script" uid="uid://di5wpumefqgaj" path="res://src/features/units/player/HeroCamera.gd" id="7_camera"]
 
 [sub_resource type="SeparationRayShape3D" id="SeparationRayShape3D_cam"]
 
@@ -16,17 +18,20 @@
 [node name="PlayerHero" type="CharacterBody3D"]
 collision_layer = 2
 script = ExtResource("1_hero")
+race_data = ExtResource("2_yr85l")
 stats_resource = ExtResource("2_stats")
 
 [node name="VisualContainer" type="Node3D" parent="."]
 
 [node name="CameraBoom" type="SpringArm3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.0805749, 1.5, 0.2663592)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.5, 1.5, 0.266)
 shape = SubResource("SeparationRayShape3D_cam")
 spring_length = 4.0
+script = ExtResource("7_camera")
 
 [node name="Camera3D" type="Camera3D" parent="CameraBoom"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.8, 0, 0)
+fov = 60.0
 
 [node name="Collision" type="CollisionShape3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)

@@ -3,20 +3,32 @@ class_name HeroController
 
 
 
+@export_group("Race")
+@export var race_data: RaceData:
+	set(value):
+		race_data = value
+		if is_inside_tree(): _apply_race_data()
+
+signal dash_cooldown_updated(current_cooldown: float, max_cooldown: float)
+
 @export_group("Movement")
 @export var speed := 10.0
 @export var sprint_speed := 18.0
+@export var dash_impulse := 25.0 # Instant velocity burst
+@export var dash_duration := 0.2 # How long friction is disabled
+@export var dash_cooldown := 3.0
+var dash_timer: float = 0.0
+var dash_active_timer: float = 0.0
+
 @export var jump_velocity := 12.0 # Increased from 12.0 for higher force against high gravity
 @export var acceleration := 60.0
 @export var friction := 50.0
 @export var air_control := 0.3
 
 @export_group("Camera")
-@export var mouse_sensitivity := 0.003
-@export var min_pitch := -80.0
-@export var max_pitch := 60.0
-
-@onready var camera_boom := $CameraBoom
+# Camera settings moved to HeroCamera.gd
+# We just hold reference for aim calculations
+@onready var camera_boom := $CameraBoom # This is now HeroCamera
 @onready var camera := $CameraBoom/Camera3D
 
 var hud_scene = preload("res://src/ui/scenes/PlayerHUD.tscn")
@@ -35,6 +47,14 @@ var gravity = ProjectSettings.get_setting("physics/3d/default_gravity") * 3.0 # 
 func _ready():
 	super._ready() # Initialize Stats, UI, etc.
 	
+	# Apply Race Data if present
+	if race_data:
+		_apply_race_data()
+	
+	# Setup Camera
+	if camera_boom and camera_boom.has_method("setup"):
+		camera_boom.setup(self)
+
 	# Disable standard UnitMovement if it exists
 	if movement:
 		movement.process_mode = Node.PROCESS_MODE_DISABLED
@@ -52,6 +72,15 @@ func _ready():
 	# Initial Update
 	if hud_instance:
 		hud_instance.update_weapon_info("Gun") # Always init to Gun
+		
+		# Connect Dash UI
+		var dash_indicator = hud_instance.get_node_or_null("CenterContainer/DashIndicator")
+		if dash_indicator:
+			dash_indicator.visible = can_dash
+			if can_dash:
+				dash_cooldown_updated.connect(dash_indicator.update_progress)
+				# Init
+				dash_indicator.update_progress(0, dash_cooldown)
 	
 	if stats_resource:
 		if stats:
@@ -90,8 +119,6 @@ func _unhandled_input(event):
 	if Input.get_mouse_mode() != Input.MOUSE_MODE_CAPTURED:
 		return
 
-
-
 	# Input for Slot Selection (1-4)
 	if event is InputEventKey and event.pressed and not event.echo:
 		if event.keycode >= KEY_1 and event.keycode <= KEY_4:
@@ -102,15 +129,7 @@ func _unhandled_input(event):
 		if event.keycode == KEY_TAB:
 			_swap_weapon()
 
-
-	if event is InputEventMouseMotion:
-		# Rotate Character around Y axis (Left/Right) - Aiming direction
-		rotate_y(-event.relative.x * mouse_sensitivity)
-		
-		# Rotate CameraBoom around X axis (Up/Down)
-		if camera_boom:
-			camera_boom.rotate_x(-event.relative.y * mouse_sensitivity)
-			camera_boom.rotation.x = clamp(camera_boom.rotation.x, deg_to_rad(min_pitch), deg_to_rad(max_pitch))
+	# NOTE: Camera/Character rotation is now handled by HeroCamera._unhandled_input
 
 var active_slot_index: int = 0
 
@@ -135,12 +154,23 @@ func _get_ability_name_at(index: int) -> String:
 
 	return "None"
 
+var can_glide: bool = false
+var can_dash: bool = true
+
 func _physics_process(delta):
 	# Handle Gravity
 	if not is_on_floor():
 		var applied_gravity = gravity
-		# If falling, apply extra gravity for snappiness
-		if velocity.y < 0:
+		
+		# Glide Logic
+		if can_glide and velocity.y < 0 and Input.is_action_pressed("jump"):
+			# Reduce gravity significantly for glide
+			applied_gravity *= 0.1 
+			# Cap falling speed
+			velocity.y = max(velocity.y, -2.0)
+			
+		# Normal Fall
+		elif velocity.y < 0:
 			applied_gravity *= 2.0 # Fall 2x faster than rise
 		
 		velocity.y -= applied_gravity * delta
@@ -155,16 +185,76 @@ func _physics_process(delta):
 	# Transform input to be relative to character rotation
 	var direction = (transform.basis * Vector3(input_dir.x, 0, input_dir.y)).normalized()
 	
-	var current_speed = sprint_speed if Input.is_action_pressed("dash") else speed
+	# Dash Mechanics
+	# Cooldown Management
+	if dash_timer > 0.0:
+		dash_timer -= delta
+		if dash_timer < 0.0:
+			dash_timer = 0.0
+		dash_cooldown_updated.emit(dash_timer, dash_cooldown)
 	
+	# Dash Active Management
+	if dash_active_timer > 0.0:
+		dash_active_timer -= delta
+		
+		# End Dash
+		if dash_active_timer <= 0.0:
+			if camera_boom.has_method("set_dash_state"):
+				camera_boom.set_dash_state(false)
+		
+		# While dashing, we skip normal ground movement/friction
+		# We essentially preserve the current velocity (linear motion)
+		# NOTE: You might want to allow *slight* air-control-like steering here?
+		# For now: LOCKED TRAJECTORY (Fixed distance feel)
+		
+		# FIX: Disable Gravity completely during dash for straight line flight
+		velocity.y = 0 
+		
+		move_and_slide()
+		return # SKIP THE REST OF PHYSICS (Normal move logic)
+		
+	# Dash Input
+	if can_dash and Input.is_action_just_pressed("dash") and dash_timer <= 0.0:
+		# Apply Dash Impulse
+		# FIX: Default forward is -transform.basis.z (Negative Z)
+		var dash_dir = direction if direction else -transform.basis.z 
+		velocity = dash_dir * dash_impulse 
+		
+		dash_timer = dash_cooldown
+		dash_active_timer = dash_duration # Start friction lock
+		
+		# FIX: Emit signal AFTER setting timer so UI knows we are on cooldown
+		dash_cooldown_updated.emit(dash_timer, dash_cooldown)
+		
+		if camera_boom.has_method("set_dash_state"):
+			# user request: Mid-air dashes should NOT lag the camera
+			if is_on_floor():
+				camera_boom.set_dash_state(true)
+			
+		print("⚡ Dash Used!")
+		
+		# Execute one frame of movement immediately?
+		move_and_slide()
+		return
+
+	# Ground Movement
 	if direction:
-		velocity.x = move_toward(velocity.x, direction.x * current_speed, acceleration * delta)
-		velocity.z = move_toward(velocity.z, direction.z * current_speed, acceleration * delta)
+		# Snappy Movement Logic
+		var applied_accel = acceleration
+		if is_on_floor():
+			var dot = velocity.normalized().dot(direction)
+			if dot < 0.8:
+				applied_accel *= 8.0 
+		
+		velocity.x = move_toward(velocity.x, direction.x * speed, applied_accel * delta)
+		velocity.z = move_toward(velocity.z, direction.z * speed, applied_accel * delta)
 	else:
 		velocity.x = move_toward(velocity.x, 0, friction * delta)
 		velocity.z = move_toward(velocity.z, 0, friction * delta)
 
 	move_and_slide()
+	
+	# Camera Logic handled by HeroCamera process (lag/follow)
 	
 	# Update Stats/Combat Timers
 	if combat:
@@ -172,6 +262,20 @@ func _physics_process(delta):
 	
 	# Forward combat inputs
 	_handle_combat_inputs()
+	
+	# DEBUG F5 Info
+	if Input.is_action_just_pressed("f5_debug"): 
+		# Toggle Debug
+		if hud_instance and hud_instance.has_method("toggle_debug"):
+			hud_instance.toggle_debug()
+			
+	if hud_instance and hud_instance.has_method("update_debug_info"):
+		var cam_angle = 0.0
+		if camera_boom and camera_boom.has_method("get_camera_angle"):
+			cam_angle = camera_boom.get_camera_angle()
+		
+		var horiz_speed = Vector3(velocity.x, 0, velocity.z).length()
+		hud_instance.update_debug_info(horiz_speed, cam_angle)
 
 func _handle_combat_inputs():
 	# Check if Casting (Targeting Mode)
@@ -186,7 +290,18 @@ func _handle_combat_inputs():
 	# Left Click: Attack (Gun or Sword)
 	if Input.is_action_pressed("fire"):
 		if combat:
-			var origin = global_position + Vector3(0, 1.5, 0) # Head height
+			var origin = global_position + Vector3(0, 1.5, 0) # Default Head
+			
+			# Use Actual Muzzle Position if visual exists
+			if current_weapon == WeaponMode.GUN and gun_mesh:
+				# Use forward face of the box? 
+				# Gun is at local (0.6, 1.0, -0.5). Box is 0.5 long. Muzzle is roughly -0.75?
+				# Let's just use the mesh origin for now, or to_global offset
+				origin = gun_mesh.global_position
+				
+			elif current_weapon == WeaponMode.SWORD and sword_mesh:
+				origin = sword_mesh.global_position
+
 			var aim_target = _get_camera_aim_point()
 			var aim_dir = (aim_target - origin).normalized()
 			
@@ -196,9 +311,6 @@ func _handle_combat_inputs():
 				
 			elif current_weapon == WeaponMode.SWORD:
 				# Melee Attack
-				# For sword, we might want "Just Pressed" to avoid rapid fire spam if holding?
-				# But "continuous" request might imply auto-swing. 
-				# Let's start with is_action_pressed for continuous swing if cooldown allows.
 				combat.execute_manual_melee_box(origin, aim_dir, sword_hitbox_size)
 			
 	# Right Click: Cast Active Ability
@@ -231,10 +343,15 @@ func _get_camera_aim_point() -> Vector3:
 	
 	var space = get_world_3d().direct_space_state
 	var query = PhysicsRayQueryParameters3D.create(from, to)
-	query.exclude = [self] # Don't hit self
-	query.collision_mask = 1 | 4 # Hit environment (1) and enemies (4) (adjust layers as needed)
+	
+	# Exclude self and camera parts
+	var excludes = [self]
+	
+	query.exclude = excludes
+	query.collision_mask = 1 | 4 # Landscape(1) + Enemy(4)
 	
 	var result = space.intersect_ray(query)
+	
 	if result:
 		return result.position
 	else:
@@ -276,3 +393,30 @@ func _create_weapon_visuals():
 func _update_weapon_visuals():
 	if gun_mesh: gun_mesh.visible = (current_weapon == WeaponMode.GUN)
 	if sword_mesh: sword_mesh.visible = (current_weapon == WeaponMode.SWORD)
+
+func _apply_race_data():
+	if not race_data: return
+	
+	print("🧬 Applying Race: %s" % race_data.display_name)
+	
+	# Apply Physics
+	jump_velocity = race_data.jump_velocity
+	air_control = race_data.air_control
+	can_glide = race_data.can_glide
+	can_dash = race_data.can_dash
+	
+	# Recalculate Gravity
+	var base_gravity = ProjectSettings.get_setting("physics/3d/default_gravity")
+	gravity = base_gravity * 3.0 * race_data.gravity_multiplier
+	
+	# Apply Stats to base stats
+	if race_data.base_stats_template:
+		# Copy race stats to runtime variables
+		speed = race_data.base_stats_template.move_speed
+		
+		# If we have a Stats component, override limits
+		if stats:
+			# Note: We probably shouldn't fully overwrite stats if they scale, 
+			# but for initialization this sets the baseline.
+			stats.stat_data = race_data.base_stats_template
+			stats._ready() # Re-init HP/Mana from new template
