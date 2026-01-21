@@ -275,7 +275,11 @@ func _physics_process(delta):
 			cam_angle = camera_boom.get_camera_angle()
 		
 		var horiz_speed = Vector3(velocity.x, 0, velocity.z).length()
-		hud_instance.update_debug_info(horiz_speed, cam_angle)
+		
+		# Scale velocity x30 to mimic Source Engine / Deadlock numbers visually
+		# 10 m/s -> 300 units/s
+		var display_speed = horiz_speed * 30.0
+		hud_instance.update_debug_info(display_speed, cam_angle)
 
 func _handle_combat_inputs():
 	# Check if Casting (Targeting Mode)

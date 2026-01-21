@@ -57,4 +57,10 @@ func _execute_blink(caster: Node, target_pos: Vector3, level: int):
 	# For Blink, instant set is standard.
 	
 	caster.global_position = final_pos
+	
+	# Fix Camera Glitch: Snap camera instantly to new position
+	if "camera_boom" in caster and caster.camera_boom:
+		if caster.camera_boom.has_method("warp_camera"):
+			caster.camera_boom.warp_camera()
+			
 	print("✨ Blink Complete. New Pos: %s. Delta: %s" % [caster.global_position, caster.global_position - caster_pos])

@@ -11,8 +11,14 @@ extends Control
 const WEAPON_WHEEL_SCENE = preload("res://src/ui/scenes/WeaponWheel.tscn")
 var weapon_wheel_instance: Control
 
+@onready var fps_label = $FPSLabel if has_node("FPSLabel") else null
+
 func _ready():
 	_create_weapon_ui()
+
+func _process(_delta):
+	if fps_label:
+		fps_label.text = "FPS: %d" % Engine.get_frames_per_second()
 
 func _create_weapon_ui():
 	# Instantiate Scene

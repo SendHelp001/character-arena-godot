@@ -38,6 +38,17 @@ func set_dash_state(is_dashing: bool):
 		_current_lag_speed = dash_lag_speed
 	# No else needed, we just switch target speed in process
 
+func warp_camera():
+	"""
+	Instantly snaps the camera to the target position, bypassing lag.
+	Call this after teleporting/blinking the character.
+	"""
+	if _target:
+		var target_pos = _target.to_global(_local_offset)
+		global_position = target_pos
+		# Also reset internal smoothing states if we had any velocity-based lag
+		_current_lag_speed = normal_lag_speed
+
 func _unhandled_input(event):
 	if not _target: return
 	
