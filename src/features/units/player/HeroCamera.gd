@@ -6,7 +6,7 @@ class_name HeroCamera
 @export var min_pitch := -80.0
 @export var max_pitch := 60.0
 @export var camera_offset_right := 0.8
-@export var normal_lag_speed := 40.0 # High speed = Almost instant
+@export var normal_lag_speed := 200.0 # High speed = Instant follow
 @export var dash_lag_speed := 8.0   # Low speed = Drag effect
 
 var _current_lag_speed: float = 40.0
@@ -61,10 +61,7 @@ func _unhandled_input(event):
 		rotation.x -= event.relative.y * mouse_sensitivity
 		rotation.x = clamp(rotation.x, deg_to_rad(min_pitch), deg_to_rad(max_pitch))
 		
-		# Force Z to 0 to prevent any skewing
-		rotation.z = 0
-
-func _physics_process(delta):
+func _process(delta):
 	if not _target: return
 	
 	# Determine Target Lag Speed
@@ -75,7 +72,6 @@ func _physics_process(delta):
 		_current_lag_speed = dash_lag_speed # Instant loosen on dash start
 	
 	# Smoothly transition current speed to target
-	# This prevents the "Snap" when recovery ends and target jumps 8 -> 40
 	_current_lag_speed = lerp(_current_lag_speed, target_speed, delta * 3.0)
 	
 	# Follow Target Position with Lag
@@ -86,33 +82,22 @@ func _physics_process(delta):
 	if _post_dash_grace_timer > 0.0:
 		_post_dash_grace_timer -= delta
 	
-	# Rubber Banding:
-	# If camera falls too far behind (e.g. Moving + Dashing), boost speed to catch up.
-	# "Dash from standstill" usually creates ~2-3m gap. "Move + Dash" creates >4m.
-	var max_lag_dist = 2.5 # Threshold where we start boosting
-	var rubber_band_factor = 1.0
+	var final_speed = _current_lag_speed
 	
-	# Only apply Rubber Banding if NOT dashing AND NOT in grace period.
-	# When dashing, we intentionally want the camera to lag (Drag Effect).
-	# Rubber banding here would fight the drag and cause jitter/glitching.
-	if not _is_dashing and _post_dash_grace_timer <= 0.0 and dist > max_lag_dist:
-		# Boost speed proportionally to how far we are
-		# Logic: speed * (1 + excess_dist * 1.5) - Reduced from 2.0 to prevent snap
-		var excess = dist - max_lag_dist
-		rubber_band_factor = 1.0 + (excess * 1.5)
+	# Hard Stick Logic (Visual Frame):
+	# If we are effective "instant" (high speed), snap directly to target to avoid ANY floating offset or jitter.
+	if final_speed > 100.0:
+		global_position = target_pos
+		_current_lag_speed = target_speed # Keep internal state synced
+	else:
+		# Use lerp for smoothing (Dashing)
+		var t = clamp(delta * final_speed, 0.0, 1.0)
+		global_position = global_position.lerp(target_pos, t)
 	
-	var final_speed = _current_lag_speed * rubber_band_factor
-	
-	# FIX: Clamp interpolation factor to 1.0 to prevent overshoot/jitter
-	# If speed is high, t > 1.0 causes the camera to fly past the target and vibrate.
-	var t = clamp(delta * final_speed, 0.0, 1.0)
-	
-	global_position = global_position.lerp(target_pos, t)
-	
-	# Sync Yaw with Target exactly (since we drive Target's Yaw)
+	# Sync Yaw with Target exactly
 	rotation.y = _target.rotation.y
-	
-	# Debug Info (can be accessed by Controller)
+# 	
+# 	# Debug Info (can be accessed by Controller)
 	
 func get_camera_angle() -> float:
 	return rad_to_deg(rotation.x)
