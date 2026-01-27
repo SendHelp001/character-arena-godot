@@ -20,9 +20,14 @@ func handle_input(camera: Camera3D, abilities_component):
 	if _check_is_casting(abilities_component): return
 
 	if Input.is_action_pressed("fire"):
+		if character.has_method("trigger_combat_action"):
+			character.trigger_combat_action()
 		_fire(camera)
 		
 	if Input.is_action_just_pressed("alt_fire"):
+		if character.has_method("trigger_combat_action"):
+			character.trigger_combat_action()
+			
 		if abilities_component and character.get("active_slot_index") != null:
 			# Cast ability from the currently selected slot
 			abilities_component.try_cast_ability(character.active_slot_index)

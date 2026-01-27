@@ -45,6 +45,11 @@ func _ready():
 	if camera_boom and camera_boom.has_method("setup"):
 		camera_boom.setup(self)
 
+	# Setup Movement View Reference
+	if hero_movement:
+		hero_movement.view_node = camera_boom # Movement is relative to Camera Boom
+		_set_combat_mode(false) # Default to Free Movement (Out of Combat)
+
 	# Disable standard UnitMovement if it exists
 	if movement:
 		movement.process_mode = Node.PROCESS_MODE_DISABLED
@@ -113,6 +118,34 @@ func _unhandled_input(event):
 		if event.keycode == KEY_TAB:
 			_swap_weapon()
 
+	# Combat Mode Toggle (Hold Right Click / Alt Fire)
+	# REMOVED: Replaced with Automatic Combat Mode on Attack/Cast
+	# if event.is_action_pressed("alt_fire"):
+	# 	_set_combat_mode(true)
+	# elif event.is_action_released("alt_fire"):
+	# 	_set_combat_mode(false)
+
+const COMBAT_COOLDOWN: float = 3.0
+var combat_mode_timer: float = 0.0
+
+func trigger_combat_action():
+	"""
+	Called by weapons/abilities when the player attacks or casts.
+	Engages combat mode (Strafe) and resets the cooldown timer.
+	"""
+	combat_mode_timer = COMBAT_COOLDOWN
+	_set_combat_mode(true)
+
+func _set_combat_mode(is_combat: bool):
+	if hero_movement:
+		hero_movement.is_strafe = is_combat
+	if camera_boom:
+		camera_boom.is_strafe = is_combat
+		
+		# If entering combat mode, snap character to camera look direction immediately
+		if is_combat and camera_boom:
+			rotation.y = camera_boom.rotation.y
+
 	# NOTE: Camera/Character rotation is now handled by HeroCamera._unhandled_input
 
 var active_slot_index: int = 0
@@ -157,6 +190,12 @@ func _physics_process(delta):
 	# Update Stats/Combat Timers
 	if combat:
 		combat.process_combat(delta)
+		
+	# Automatic Combat Mode Timer
+	if combat_mode_timer > 0.0:
+		combat_mode_timer -= delta
+		if combat_mode_timer <= 0.0:
+			_set_combat_mode(false) # Revert to Free Movement
 	
 	# Forward combat inputs
 	if hero_weapons:

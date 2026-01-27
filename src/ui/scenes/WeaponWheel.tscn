@@ -1,7 +1,7 @@
 [gd_scene load_steps=4 format=3 uid="uid://weapon_wheel_ui"]
 
 [ext_resource type="Script" path="res://src/ui/scenes/WeaponWheel.gd" id="1_script"]
-[ext_resource type="Texture2D" uid="uid://indicator_circle_tex" path="res://src/features/abilities/casting/assets/IndicatorCircle.tres" id="2_tex"]
+[ext_resource type="Texture2D" uid="uid://d2lb5ignumor3" path="res://src/features/abilities/casting/assets/IndicatorCircle.tres" id="2_tex"]
 
 [node name="WeaponWheel" type="Control"]
 layout_mode = 3

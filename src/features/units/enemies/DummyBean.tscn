@@ -1,6 +1,6 @@
 [gd_scene load_steps=9 format=3 uid="uid://pigfxvick71d"]
 
-[ext_resource type="Script" uid="uid://dqu6mlfgb021" path="res://src/features/units/Unit.gd" id="1_unit"]
+[ext_resource type="Script" path="res://src/features/units/Unit.gd" id="1_unit"]
 [ext_resource type="Resource" path="res://src/features/units/enemies/dummy_base.tres" id="2_stats"]
 [ext_resource type="Script" uid="uid://qmvpsehqlu16" path="res://src/features/units/components/UnitCombat.gd" id="3_combat"]
 [ext_resource type="Script" uid="uid://b4od0xn7aejg2" path="res://src/features/units/components/UnitAbilities.gd" id="4_abilities"]

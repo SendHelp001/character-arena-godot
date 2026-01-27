@@ -77,13 +77,37 @@ func _handle_dash_active(delta):
 	character.velocity.y = 0
 	# No friction/input change during dash
 
+@export var rotation_speed := 10.0
+
+var view_node: Node3D
+var is_strafe: bool = true # Default to true for now, controlled by Controller
+
+# ... logic updates ...
+
 func _get_input_velocity(delta) -> Vector3:
 	var input_dir = Input.get_vector("move_left", "move_right", "move_forward", "move_backward")
-	var direction = (character.transform.basis * Vector3(input_dir.x, 0, input_dir.y)).normalized()
+	
+	# Direction is relative to VIEW (Camera) if available, otherwise Character
+	var basis_ref = view_node.transform.basis if view_node else character.transform.basis
+	var direction = (basis_ref * Vector3(input_dir.x, 0, input_dir.y))
+	direction.y = 0 # Flatten to plane
+	direction = direction.normalized()
 	
 	var target_vel = character.velocity
 	
 	if direction:
+		# Free Rotation Logic: Rotate character to face movement direction
+		if not is_strafe:
+			var target_anim_basis = Basis.looking_at(direction)
+			var q_from = Quaternion(character.transform.basis)
+			var q_to = Quaternion(target_anim_basis)
+			
+			# Interpolate rotation
+			character.transform.basis = Basis(q_from.slerp(q_to, rotation_speed * delta))
+			
+			# Ensure X/Z rotation stays flat (might be handled by looking_at implicitly, but safer to force Y-axis only if needed)
+			# But looking_at(dir) where dir.y=0 is usually fine for upright chars.
+			
 		var applied_accel = acceleration
 		if character.is_on_floor():
 			var dot = character.velocity.normalized().dot(direction)
@@ -104,7 +128,16 @@ func _apply_velocity(target_vel: Vector3):
 func _handle_dash_input():
 	if can_dash and Input.is_action_just_pressed("dash") and dash_timer <= 0.0:
 		var input_dir = Input.get_vector("move_left", "move_right", "move_forward", "move_backward")
-		var direction = (character.transform.basis * Vector3(input_dir.x, 0, input_dir.y)).normalized()
+		
+		# FIX: Use View/Camera Basis for Dash Direction checks, same as Movement.
+		# This ensures that pressing 'W' always dashes "Up" (North/Camera Forward), 
+		# even if the character is facing "Down" (South/Camera Backward).
+		var basis_ref = view_node.transform.basis if view_node else character.transform.basis
+		var direction = (basis_ref * Vector3(input_dir.x, 0, input_dir.y))
+		direction.y = 0
+		direction = direction.normalized()
+		
+		# If no input, dash forward relative to CHARACTER facing
 		var dash_dir = direction if direction else -character.transform.basis.z 
 		
 		character.velocity = dash_dir * dash_impulse
