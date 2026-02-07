@@ -55,7 +55,7 @@ func toggle_debug():
 	if debug_label:
 		debug_label.visible = debug_visible
 
-func update_debug_info(velocity: float, angle: float):
+func update_debug_info(velocity: float, cam_rot: Vector3):
 	if not debug_visible: return
 	
 	if not debug_label:
@@ -64,7 +64,7 @@ func update_debug_info(velocity: float, angle: float):
 		debug_label.position = Vector2(10, 200)
 		add_child(debug_label)
 		
-	debug_label.text = "Vel: %.1f\nCam Angle: %.1f" % [velocity, angle]
+	debug_label.text = "Vel: %.1f\nCam: (%.1f, %.1f, %.1f)" % [velocity, cam_rot.x, cam_rot.y, cam_rot.z]
 
 func setup_inventory(inventory: UnitInventory):
 	if inventory_ui:

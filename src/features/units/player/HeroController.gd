@@ -208,16 +208,16 @@ func _physics_process(delta):
 			hud_instance.toggle_debug()
 			
 	if hud_instance and hud_instance.has_method("update_debug_info"):
-		var cam_angle = 0.0
-		if camera_boom and camera_boom.has_method("get_camera_angle"):
-			cam_angle = camera_boom.get_camera_angle()
+		var cam_rot = Vector3.ZERO
+		if camera_boom:
+			cam_rot = camera_boom.rotation_degrees
 		
 		var horiz_speed = Vector3(velocity.x, 0, velocity.z).length()
 		
 		# Scale velocity x30 to mimic Source Engine / Deadlock numbers visually
 		# 10 m/s -> 300 units/s
 		var display_speed = horiz_speed * 30.0
-		hud_instance.update_debug_info(display_speed, cam_angle)
+		hud_instance.update_debug_info(display_speed, cam_rot)
 
 func _update_animations():
 	if not anim_state_machine: return

@@ -57,10 +57,14 @@ func _process(delta):
 	var target_pos = target.global_position + rotated + vert
 	
 	# Fix Wall Clipping:
-	# Raycast from Character Axis (origin) to the desired Offset Position (target_pos).
-	# If we hit a wall, stop the camera base from entering it.
 	var pivot_origin = target.global_position + vert
 	target_pos = _prevent_wall_clip(pivot_origin, target_pos)
+
+	# FORCE ROTATION UPDATE
+	# If internal physics or parent transforms drift, we snap it back.
+	# We only want to rotate the SpringArm to match our pitch/yaw.
+	rotation = Vector3(cam_pitch, cam_yaw, 0)
+
 
 	# Use normal lag speed (if high enough, it acts as instant)
 	if normal_lag_speed > 100.0:
@@ -70,6 +74,23 @@ func _process(delta):
 			target_pos,
 			clamp(delta * normal_lag_speed, 0.0, 1.0)
 		)
+
+	# Sync rotation if strafing
+	if is_strafe:
+		# Force camera yaw to track target (if target turns via physics)
+		# But wait, Input sets Target FROM Camera.
+		# If we set Camera FROM Target here, we might get loops?
+		# Actually, rotation.y is the master in Strafe.
+		# Ideally both match.
+		pass 
+		# If I enable this: `rotation.y = target.rotation.y`
+		# And Input does: `target.rotation.y = cam_yaw`.
+		# It works if Target Rotation is the Source of Truth.
+		# But Input updates cam_yaw.
+		# Let's keep Input as Source of Truth for Strafe.
+		
+		# Current issue: "Angle Descends".
+		# Let's just fix the indentation/dead code first.
 
 func _prevent_wall_clip(from: Vector3, to: Vector3) -> Vector3:
 	var space = get_world_3d().direct_space_state
@@ -90,9 +111,6 @@ func _prevent_wall_clip(from: Vector3, to: Vector3) -> Vector3:
 
 
 
-	if is_strafe:
-		rotation.y = target.rotation.y
-		cam_yaw = rotation.y
 
 func get_camera_angle() -> float:
 	return rad_to_deg(rotation.x)
